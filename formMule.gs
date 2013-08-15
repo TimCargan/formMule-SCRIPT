@@ -1,4 +1,6 @@
-var scriptTitle = "formMule Script V6.3.1 (3/8/13)";
+var scriptTitle = "formMule Script V6.3.4 (8/15/13)";
+var scriptName = 'formMule'
+var scrtiptTrackingId = 'UA-30976195-1'
 // Written by Andrew Stillman for New Visions for Public Schools
 // Published under GNU General Public License, version 3 (GPL-3.0)
 // See restrictions at http://www.opensource.org/licenses/gpl-3.0.html
@@ -73,7 +75,6 @@ function formMule_quitUi(e) {
 
 function formMule_completeInstall() {
   setFormMuleSid();
-  setFormMuleUid();
   formMule_getInstitutionalTrackerObject();
   formMule_preconfig();
   upgrade();
