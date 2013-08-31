@@ -80,13 +80,15 @@ function setFormMuleSid()
     var ms_str = ms.toString();
     ScriptProperties.setProperty("formmule_sid", ms_str);
     var formmule_uid = UserProperties.getProperty("formmule_uid");
-    if (formmule_uid != null || formmule_uid != "") {
+    if (formmule_uid != null && formmule_uid != "") {
       formMule_logRepeatInstall();
-    }else{
+    } else {
       formMule_logFirstInstall();
+      UserProperties.setProperty('formmule_uid', ms_str);
     }
   }
 }
+
 
 
 function formMule_clearAllFlags() {
