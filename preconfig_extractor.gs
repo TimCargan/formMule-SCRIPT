@@ -1,17 +1,11 @@
 function formMule_extractorWindow () {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var properties = ScriptProperties.getProperties();
-  properties.preconfigStatus = false;
-  properties.calendarToken = '';
-  properties.webAppUrl = '';
-  properties.twilioNumber = '';
-  properties.accountSID = '';
-  properties.lastPhone = '';
-  properties.authToken = '';
   var propertyString = '';
+  var excludeProperties = ['formmule_sid', 'caseNo', 'ssId', 'SSId', 'calendarToken', 'webAppUrl','twilioNumber','accountSID','lastPhone','authToken','preconfigStatus', 'ssId', 'ssKey', 'formulaTriggerSet'];
   for (var key in properties) {
-    if (properties[key]!='') {
-      var keyProperty = properties[key].replace(/[/\\*]/g, "\\\\");                                     
+    if (excludeProperties.indexOf(key)==-1) {
+      var keyProperty = properties[key]; //.replace(/[/\\*]/g, "\\\\");                                     
       propertyString += "   ScriptProperties.setProperty('" + key + "','" + keyProperty + "');\n";
     }
   }
@@ -29,9 +23,9 @@ function formMule_extractorWindow () {
   codeString += "};\n";
   codeString += "ScriptProperties.setProperty('preconfigStatus','true');\n";
   codeString += "var ss = SpreadsheetApp.getActiveSpreadsheet();\n";
-  codeString += "if (ss.getSheetByName('Forms in same folder')) { \n";
-  codeString += "  formMule_retrieveformurls(); \n";
-  codeString += "} \n";
+  if (properties.formulaTriggerSet == "true") {
+    codeString += "setCopyDownTrigger(); \n";
+  }
   
  //generate msgbox warning code if automated email or calendar is enabled in template 
   if ((properties.calendarStatus == 'true')||(properties.emailStatus == 'true')) {
