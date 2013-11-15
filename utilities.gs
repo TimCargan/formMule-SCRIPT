@@ -190,19 +190,46 @@ function formMule_clearEventCreateFlags() {
   }
 }
 
-function rangetotable(input) {
-  var output = '<table cellpadding="8" border="1">';
+function rangetotable(input, headers) {
+  var output = '<table cellpadding="8" cellspacing="0" style="border: 1px solid grey;">';
   var rows = input.length;
   var cols = input[0].length;
+  if (headers) {
+    if (headers[0].length != cols) {
+      return "input and header arrays must be the same width";
+    }
+    output += "<tr>";
+    for (var i=0; i<headers[0].length; i++) {
+      output += "<th style=\"background-color:#DDDDDD; border: 1px solid grey;\">"+headers[0][i]+"</th>";
+    }
+    output += "</tr>";
+  }
   for (var i=0; i<input.length; i++) {
     output += "<tr>";
     for (var j=0; j<input[0].length; j++) {
-      if (i==0) {
-        output += '<th bgcolor="whitesmoke">'+input[i][j]+'</th>';
-      } else {
-        output += "<td>"+input[i][j]+"</td>";
+        output += "<td style=\"border: 1px solid grey;\">"+input[i][j]+"</td>";
       }
+    output += "</tr>";
+  }
+  output += "</table>";
+  return output;
+}
+
+
+function rangetoverticaltable(input, headers) {
+  var output = '<table cellpadding="8" cellspacing="0" style="border: 1px solid grey;">';
+  var rows = input[0].length;
+  if (headers) {
+    if (headers[0].length != rows) {
+      return "input and header arrays must be the same width";
     }
+  }
+  for (var i=0; i<input[0].length; i++) {
+    output += "<tr>";
+     if (headers) {
+      output += "<th style=\"background-color:#DDDDDD; border: 1px solid grey;\">"+headers[0][i]+"</th>";
+    }
+    output += "<td style=\"border: 1px solid grey;\">"+input[0][i]+"</td>";
     output += "</tr>";
   }
   output += "</table>";
