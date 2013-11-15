@@ -13,7 +13,7 @@ function formMule_whatIs() {
   var html = "<h3>Features</h3>";
       html += "<ul><li>Set up and generate templated, merged emails from form or spreadsheet data.</li>";
       html += "<li>Optionally set 'send conditions' that trigger up to six different emails based on a column's value in the merged row.  Allows for branching or differentiated outputs based on the value of individual form responses.</li>";
-      html += "<li>Can be set to auto-copy-down formula columns (on form submit) that operate to the right of form data.  Great for use with VLOOKUP and IF formulas that reference form data.  For example, look up an email address in another sheet based on a name submitted in the form.</li>"; 
+      html += "<li>Can be set to auto-copy-down formula columns (on form submit) that operate to the right of form data.  Great for use with VLOOKUP and IF formulas that reference form data.  For example, look up an email address in another sheet based on a name submitted in the form.  This feature is available under \"Advanced options.\"</li>"; 
       html += "<li>Auto-generate and auto-update calendar events using form or spreadsheet data and conditions.</li>";
       html += "<li>Easily connects to the Twilio SMS and Voice service to enable SMS and Voice merges from Spreadsheet or Form data.</li>";
       html += "<li>Can be triggered on form submit or run manually after merge preview.</li>"; 
@@ -23,7 +23,7 @@ function formMule_whatIs() {
   mainGrid.setWidget(0, 0, app.createHTML(html));
   var sponsorLabel = app.createLabel("Brought to you by");
   var sponsorImage = app.createImage("http://www.youpd.org/sites/default/files/acquia_commons_logo36.png");
-  var supportLink = app.createAnchor('Watch the tutorial!', 'http://www.youpd.org/formmule');
+  var supportLink = app.createAnchor('Get the tutorials!', 'http://cloudlab.newvisions.org/scripts/formmule');
   mainGrid.setWidget(1, 0, sponsorLabel);
   mainGrid.setWidget(2, 0, sponsorImage);
   mainGrid.setWidget(3, 0, supportLink);
