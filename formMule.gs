@@ -1,4 +1,4 @@
-var scriptTitle = "formMule Script V6.3.5 (8/15/13)";
+var scriptTitle = "formMule Script V6.4.0 (10/24/13)";
 var scriptName = 'formMule'
 var scriptTrackingId = 'UA-30976195-1'
 // Written by Andrew Stillman for New Visions for Public Schools
@@ -51,8 +51,8 @@ function onOpen() {
 function formMule_advanced() {
   var app = UiApp.createApplication().setTitle("Advanced options").setHeight(130).setWidth(290);
   var quitHandler = app.createServerHandler('formMule_quitUi');
-  var handler1 = app.createServerHandler('formMule_retrieveformurlUi');
-  var button1 = app.createButton('Generate pre-populated URLs to other forms.').addClickHandler(quitHandler).addClickHandler(handler1);
+  var handler1 = app.createServerHandler('detectFormSheet');
+  var button1 = app.createButton('Copy down formulas on form submit').addClickHandler(quitHandler).addClickHandler(handler1);
   var handler2 = app.createServerHandler('formMule_extractorWindow');
   var button2 = app.createButton('Package this workflow for others to copy').addClickHandler(quitHandler).addClickHandler(handler2);
   var handler3 = app.createServerHandler('formMule_institutionalTrackingUi');
@@ -76,7 +76,6 @@ function formMule_quitUi(e) {
 function formMule_completeInstall() {
   setFormMuleSid();
   formMule_preconfig();
-  upgrade();
   ScriptProperties.setProperty('installedFlag', 'true');
   var triggers = ScriptApp.getScriptTriggers();
   var formTriggerSetFlag = false;
@@ -99,26 +98,7 @@ function formMule_completeInstall() {
     formMule_setEditTrigger();
   }
 //ensure console and readme sheets exist
- var sheets = ss.getSheets();
- var readMeSet = false;
-  for (var i=0; i<sheets.length; i++) {
- if (sheets[i].getName()=="formMule Read Me") {
-   readMeSet = true;
-   break;
- }
- }
-  if (readMeSet==false) {
-   var sheet = ss.insertSheet("formMule Read Me");
-   formMule_setReadMeText(sheet);
-   ss.setActiveSheet(sheet);
-  } else {
-    var sheet = ss.getSheetByName("formMule Read Me");
-    ss.setActiveSheet(sheet);
-    ss.deleteActiveSheet();
-    var sheet = ss.insertSheet("formMule Read Me");
-    formMule_setReadMeText(sheet);
-    ss.setActiveSheet(sheet);
- }
+
  onOpen();
 }
 
@@ -631,14 +611,9 @@ function formMule_uncheck() {
 }
 
 function formMule_fetchHeaders(sheet) {
-  var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-  if (!(headers)) {
-    var lastCol = sheet.getLastColumn();
-    if (lastCol==0) { 
-      var dummyheaders = [["Dummy Header 1", "Dummy Header 2", "Dummy Header 3"]];
-      var range = sheet.getRange(1, 1, 1, 3).setValues(dummyheaders);
-      lastCol = sheet.getLastColumn();
-    }
+  if (sheet.getLastColumn() < 1) {
+    sheet.getRange(1, 1, 1, 3).setValues([['Dummy Header 1','Dummy Header 2','Dummy Header 3']]);
+    SpreadsheetApp.flush();
   }
   var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
   return headers;  
@@ -781,46 +756,26 @@ function formMule_saveCalendarSettings (e) {
   
 
 function formMule_onFormSubmit () {
+  var properties = ScriptProperties.getProperties();
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  if (!ss) {
+     ss = SpreadsheetApp.openById(properties.ssId);
+  }
+  var submissionRow = ss.getActiveRange().getRow();
   var lock = LockService.getPublicLock();
   lock.waitLock(120000);
   var sheetName = ScriptProperties.getProperty('sheetName');
   var sheet = ss.getSheetByName(sheetName);
   var headers = formMule_fetchHeaders(sheet);
-  var colSettings = ScriptProperties.getProperty('colSettings')
-  if (colSettings) {
-   colSettings = colSettings.split(",");
-  }
   var caseNoSetting = ScriptProperties.getProperty('caseNoSetting');
-  var lastRow = sheet.getLastRow();
-  var lastCol = sheet.getLastColumn();
-  var asValues = ScriptProperties.getProperty('asValues');
-  if (colSettings) {
-  for (var i = 0; i<colSettings.length; i++) {
-    var colSettingIndex = headers.indexOf(unescape(colSettings[i]))
-    if (colSettingIndex!=-1) {
-      var formulaCell = sheet.getRange(2, colSettingIndex+1);
-      var destColValues = sheet.getRange(lastRow, colSettingIndex+1, 1, 1).getValues();
-      if (destColValues[0][0] =='') {
-          var cellRange = sheet.getRange(lastRow, colSettingIndex+1);
-          formulaCell.copyTo(cellRange);
-         if (asValues=="true") {
-           var value = cellRange.getValue();
-           cellRange.setValue(value);
-         }
-          cellRange.setBackground("white");
-          cellRange.setComment(null);
-        }    
-      }
-    }
-  }
-
+  formMule_waitForFormulaCaddy(ss);
   if (caseNoSetting == "true") {
     var headers = formMule_fetchHeaders(sheet);
     var caseNoIndex = headers.indexOf("Case No");
-    var cellRange = sheet.getRange(lastRow, caseNoIndex+1);
+    var cellRange = sheet.getRange(submissionRow, caseNoIndex+1);
     var cellValue = cellRange.getValue();
     if (cellValue=="") {
-    cellRange.setValue(formMule_assignCaseNo());
+      cellRange.setValue(formMule_assignCaseNo());
     }
   }
   formMule_sendEmailsAndSetAppointments();
@@ -2081,17 +2036,8 @@ function formMule_isDigit(char) {
 function formMule_defineSettings() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheets = ss.getSheets();
-  var app = UiApp.createApplication().setTitle("Step 1: Define merge source settings").setHeight(450);
-  var panel = app.createVerticalPanel().setId("settingsPanel");
-  var gridPanel = app.createVerticalPanel().setWidth("100%").setId("gridPanel").setVisible(false);
-  var gridLabel = app.createLabel("Choose any columns to the right of your form data that contain formulas you want copied down...").setStyleAttribute("marginLeft", "25px").setStyleAttribute('color', 'blue');
-  var copyValuesCheckBox = app.createCheckBox("Copy formula results \'as values\' (helps improve spreadsheet performance)").setName("asValues").setId("copyValuesCheckBox");
-  copyValuesCheckBox.setStyleAttribute('marginLeft', '10px').setStyleAttribute('fontWeight', 'italic');
-  gridPanel.add(gridLabel);
-  gridPanel.add(copyValuesCheckBox);
-  var scrollPanel = app.createScrollPanel().setHeight("120px").setWidth("100%").setStyleAttribute("overflow", "scroll").setStyleAttribute("marginLeft", "30px");
-  gridPanel.add(scrollPanel);
-  var grid = app.createGrid(1,1).setId("checkBoxGrid");
+  var app = UiApp.createApplication().setTitle("Step 1: Define merge source settings").setHeight(300);
+  var panel = app.createVerticalPanel().setId("settingsPanel");  
   var sheetLabel = app.createLabel().setText("Choose the sheet that you want the script to use as a data source for merged emails and/or calendar events.");
   sheetLabel.setStyleAttribute("background", "#E5E5E5").setStyleAttribute("marginTop", "20px").setStyleAttribute("padding", "5px");
   var sheetChooser = app.createListBox().setId("sheetChooser").setName("sheet");
@@ -2108,7 +2054,7 @@ function formMule_defineSettings() {
     sheetChooser.setSelectedIndex(sheetIndex);
   }
   
-  var optionsLabel = app.createLabel("Optional settings").setStyleAttribute("background", "#E5E5E5").setStyleAttribute("marginTop", "20px").setStyleAttribute("padding", "5px");
+  var optionsLabel = app.createLabel("Optional").setStyleAttribute("background", "#E5E5E5").setStyleAttribute("marginTop", "20px").setStyleAttribute("padding", "5px");
  
   var caseNoSetting = ScriptProperties.getProperty('caseNoSetting'); 
   var caseNoCheckBox = app.createCheckBox().setId("caseNoCheckBox").setName("caseNoSetting").setText("Auto-create a unique case number for each form submission")
@@ -2118,12 +2064,7 @@ function formMule_defineSettings() {
   var helpPopup = app.createDecoratedPopupPanel();
   var fieldsLabel = app.createLabel().setText("The formMule script can be used to merge emails and calendar events from any data sheet, however it gains additional power when coupled with a Google Form, VLOOKUP, and other formulas.  See the \"Read Me\" tab in this spreadsheet or visit http://www.youpd.org/formmule for more information about how to use it.");                                         
 
-                                              
-  formMule_setGrid(app);
-  var sheetChooserServerHandler = app.createServerHandler('formMule_refreshGrid').addCallbackElement(panel);
-  var sheetChooserClientHandler = app.createClientHandler().forTargets(grid)
-  
-  
+                                          
   helpPopup.add(fieldsLabel);
   panel.add(helpPopup);
   panel.add(sheetLabel);
@@ -2139,31 +2080,11 @@ function formMule_defineSettings() {
   spinner.setStyleAttribute("left", "190px");
   spinner.setId("dialogspinner");
   
-  var copyDownOptionHandler = app.createServerHandler('formMule_refreshGrid').addCallbackElement(panel);
-  var copyDownOption = ScriptProperties.getProperty('copyDownOption');
+  var copyDownLabel = app.createLabel("Looking to copy formulas down on form submit? This feature is now located in the \"Advanced options\" menu option.").setStyleAttribute('marginTop', '10px');
+  panel.add(copyDownLabel);
   var spinnerHandler = app.createClientHandler().forTargets(spinner).setVisible(true).forTargets(panel).setStyleAttribute('opacity', '0.5');
-  var spinnerHandler2 = app.createClientHandler().forTargets(gridPanel).setStyleAttribute('opacity', '0.5').forTargets(spinner).setVisible(true);
-  var copyDownOptionCheckBox = app.createCheckBox().setText("Copy down formula columns when new form submissions arrive.").setName('copyDownOption').addValueChangeHandler(copyDownOptionHandler).addValueChangeHandler(spinnerHandler);
-  copyDownOptionCheckBox.setStyleAttribute("marginTop", "20px");
-  if (copyDownOption=="true") {
-    copyDownOptionCheckBox.setValue(true);
-    gridPanel.setVisible(true);
-  }
-  var asValues = ScriptProperties.getProperty('asValues');
-  if ((copyDownOption=="true")&&(asValues=="true")) {
-    copyValuesCheckBox.setValue(true);
-  }
-  
-  panel.add(copyDownOptionCheckBox);
-  
-  scrollPanel.add(grid);
-  gridPanel.add(scrollPanel)
-  panel.add(gridPanel);
- 
-  
   app.add(panel);
   
-  sheetChooser.addChangeHandler(sheetChooserServerHandler).addChangeHandler(sheetChooserClientHandler).addChangeHandler(spinnerHandler2);
   var buttonHandler = app.createServerClickHandler('formMule_saveSettings').addCallbackElement(panel);
   var button = app.createButton("Save settings", buttonHandler).setId('saveButton');
   button.addMouseDownHandler(spinnerHandler); 
@@ -2181,95 +2102,14 @@ function formMule_saveSettings(e) {
   var sheet = ss.getSheetByName(sheetName);
   var headers = formMule_fetchHeaders(sheet);
   var lastCol = sheet.getLastColumn();
-  var copyDownOption = e.parameter.copyDownOption;
-  var oldCopyDownOption = ScriptProperties.getProperty("copyDownOption");
-  var asValues = e.parameter.asValues;
- 
-
+  
   if (lastCol==0) { 
     Browser.msgBox("You have no headers in your data sheet. Please fix this and come back."); 
     formMule_defineSettings();
     app.close();
     return app; 
   }
-  
-  //Fetch any old column settings
-  var oldColSettings = ScriptProperties.getProperty('colSettings');
-  if (oldColSettings) {
-    oldColSettings = oldColSettings.split(",");
-  }
-  
-  //Determine if old sheet is different than currently selected sheet
-  if ((oldSheetName)&&(oldSheetName!=sheetName)) {
-    var oldSheet = ss.getSheetByName(oldSheetName);
-    var oldHeaders = formMule_fetchHeaders(oldSheet);
-    var unsetFlag = true;
-  }
-  
-  //Fetch column settings  
-  var colSettings = [];
-  for (var i=0; i<headers.length; i++) {
-    var normalizedHeader = formMule_normalizeHeader(headers[i]);
-    var checked = e.parameter[normalizedHeader];
-    if (checked == "true") {
-      colSettings.push(escape(headers[i])); 
-    }
-  }
-  
-  if (colSettings.length==0) {
-    copyDownOption = "false";
-  }
-  ScriptProperties.setProperty('copyDownOption',copyDownOption);
-  ScriptProperties.setProperty('asValues', asValues);
-  
-  //Fetch row 2 values
-  var rowTwoRange = sheet.getRange(2, 1, 1, sheet.getLastColumn());
-
-  //determine whether a formula row needs to be inserted
-  if (((copyDownOption=="true")&&(!(oldCopyDownOption)))||((copyDownOption=="true")&&(oldCopyDownOption=="false"))||((copyDownOption=="true")&&(unsetFlag == true))) {
-    sheet.setFrozenRows(1);
-    sheet.insertRowAfter(1);
-  }
-  
-  if (copyDownOption=="true") {
-    formMule_lockFormulaRow();
-  }
-  
-  ScriptProperties.setProperty('colSettings', colSettings.join());
-    for (var i=0; i<headers.length; i++) {
-      var normalizedHeader = formMule_normalizeHeader(headers[i]);
-      if ((copyDownOption == "true")&&(colSettings.indexOf(escape(headers[i]))!=-1)) {
-        var cellRange = sheet.getRange(2, i+1);
-        if ((cellRange.getValue()=='')&&(cellRange.getFormula()=='')) {
-          var copyCell = sheet.getRange(3, i+1).copyTo(cellRange);
-        }
-        cellRange.setBackground("yellow");
-        cellRange.setComment("This cell's value or formula will be copied into the cell in the last row of this column when a new form entry is submitted.");
-        var cellRange = sheet.getRange(1, i+1).setComment("Don't change the name of this column without resaving in Step 1.")
-      }
-      if ((copyDownOption == "true")&&(colSettings.indexOf(escape(headers[i]))==-1)) {
-         var cell = sheet.getRange(1, i+1);
-         var cellRange = sheet.getRange(2, i+1);
-        if ((cell.getBackground()=="black")||(cell.getBackground()=="orange")||(cell.getBackground()=="#0099FF")||(cell.getBackground()=="#FF9999")||(cell.getBackground()=="#66C285")) {  
-           cell.copyTo(cellRange);           
-           cellRange.setValue("N/A: This is the formula row.");
-           cellRange.setComment('');
-        }
-        if (cell.getBackground()=="#DDDDDD") {
-          cell.copyTo(cellRange);
-          cellRange.setComment("These headers are duplicated because this row holds formulas");
-        }
-      }
-      
-    if(oldColSettings) {
-      if ((copyDownOption == "false")&&(oldColSettings.indexOf(escape(headers[i]))!=-1)) {
-        var cellRange = sheet.getRange(2, i+1);
-        cellRange.setBackground("white").setFontColor("Black").setComment('');
-        var cellRange = sheet.getRange(1, i+1).setComment('');
-      }
-    }
-  }
-  
+    
   var caseNoSetting = e.parameter.caseNoSetting;
   ScriptProperties.setProperty('caseNoSetting', caseNoSetting);
   
@@ -2280,9 +2120,6 @@ function formMule_saveSettings(e) {
   if (caseNoIndex == -1) {
     sheet.insertColumnAfter(sheet.getLastColumn());
     sheet.getRange(1,sheet.getLastColumn()+1).setBackground("orange").setFontColor("black").setValue("Case No").setComment("Don't change the name of this column. It is used to log a unique case number for each form submission.");
-    if (copyDownOption=="true") {
-      sheet.getRange(2,sheet.getLastColumn()).setBackground("orange").setFontColor("black").setValue(formMule_assignCaseNo("0"));
-    }
    }
   }
   if (caseNoSetting=="false") {
@@ -2303,54 +2140,7 @@ function formMule_saveSettings(e) {
   return app;
 }
 
-function formMule_setGrid(app) {
-  var gridPanel = app.getElementById("gridPanel");
-  var grid = app.getElementById("checkBoxGrid");  
-  var panel = app.getElementById("settingsPanel");
-  var sheetName = ScriptProperties.getProperty("sheetName");
-  var sheet = ss.getSheetByName(sheetName);
-  if (!sheet) {
-    sheet = ss.getSheets()[0];
-  }
-  var lastCol = sheet.getLastColumn();
-  if (lastCol==0) { 
-    var dummyheaders = [["Dummy Header 1", "Dummy Header 2", "Dummy Header 3"]];
-    var range = sheet.getRange(1, 1, 1, 3).setValues(dummyheaders);
-    lastCol = sheet.getLastColumn();
-  }
-  var headers = formMule_fetchHeaders(sheet);
-  grid.resize(headers.length, 1);
-  gridPanel.setVisible(false);
-  var copyDownOption = ScriptProperties.getProperty("copyDownOption");
-  if (copyDownOption=="true") {
-    gridPanel.setVisible(true);
-  }
-  var colSettings = ScriptProperties.getProperty('colSettings');
-  if ((colSettings)&&(colSettings!='')) {
-    colSettings = colSettings.split(",");
-  }
-  var count=0;
-  for (var i=0; i<headers.length; i++) {
-    var normalizedHeader = formMule_normalizeHeader(headers[i]);
-    var checkBox = app.createCheckBox().setText(headers[i]).setName(normalizedHeader).setId("checkBox-"+i);
-    var cell = sheet.getRange(1, i+1);
-    if ((colSettings)&&(colSettings.indexOf(escape(headers[i]))!=-1)) {
-        checkBox.setValue(true);
-    }
-    if ((cell.getBackground()=="#DDDDDD")||(cell.getBackground()=="black")||(cell.getBackground()=="orange")||(cell.getBackground()=="#0099FF")||(cell.getBackground()=="#FF9999")||(cell.getBackground()=="#66C285")) { 
-      checkBox.setVisible(false).setValue(false);  
-      } else {
-       count++;
-      }
-    grid.setWidget(i,0, checkBox);
-   
-  }
-  if (count==0) {
-    var noneLabel = app.createLabel("You have no columns to the right of the form data in the selected sheet.");
-    grid.setWidget(0,0, noneLabel);
-  }
-  return app;
-}
+
 
 function formMule_getSheetIndex(sheetName) {
   var app = UiApp.getActiveApplication();
