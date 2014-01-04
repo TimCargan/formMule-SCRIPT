@@ -1,4 +1,4 @@
-var scriptTitle = "formMule Script V6.4.0 (10/24/13)";
+var scriptTitle = "formMule Script V6.5.0 (12/16/13)";
 var scriptName = 'formMule'
 var scriptTrackingId = 'UA-30976195-1'
 // Written by Andrew Stillman for New Visions for Public Schools
@@ -51,7 +51,7 @@ function onOpen() {
 function formMule_advanced() {
   var app = UiApp.createApplication().setTitle("Advanced options").setHeight(130).setWidth(290);
   var quitHandler = app.createServerHandler('formMule_quitUi');
-  var handler1 = app.createServerHandler('detectFormSheet');
+  var handler1 = app.createServerHandler('formMule_detectFormSheet');
   var button1 = app.createButton('Copy down formulas on form submit').addClickHandler(quitHandler).addClickHandler(handler1);
   var handler2 = app.createServerHandler('formMule_extractorWindow');
   var button2 = app.createButton('Package this workflow for others to copy').addClickHandler(quitHandler).addClickHandler(handler2);
@@ -768,7 +768,7 @@ function formMule_onFormSubmit () {
   var sheet = ss.getSheetByName(sheetName);
   var headers = formMule_fetchHeaders(sheet);
   var caseNoSetting = ScriptProperties.getProperty('caseNoSetting');
-  formMule_waitForFormulaCaddy(ss);
+  copyDownFormulas(submissionRow, properties);
   if (caseNoSetting == "true") {
     var headers = formMule_fetchHeaders(sheet);
     var caseNoIndex = headers.indexOf("Case No");
@@ -1352,6 +1352,9 @@ function formMule_sendEmailsAndSetAppointments(manual) {
   var sheet = ss.getSheetByName(sheetName);
   ss.setActiveSheet(sheet);
   var headers = formMule_fetchHeaders(sheet);
+  if (headers.indexOf("Formula Copy Down Status") != -1) {
+    var copyDownFormulasCol = true;
+  }
   var days = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
   if (((calendarStatus == "true")&&(manual==true))||((calendarStatus == "true")&&(calTrigger=="true"))||((calendarUpdateStatus == "true")&&(manual==true))||((calendarUpdateStatus == "true")&&(calUpdateTrigger=="true"))) {
     CacheService.getPrivateCache().remove('lastCalendarId');
@@ -1423,15 +1426,21 @@ function formMule_sendEmailsAndSetAppointments(manual) {
   var lastHeader = sheet.getRange(1, sheet.getLastColumn());
   var lastHeaderValue = formMule_normalizeHeader(lastHeader.getValue());  
   var k=2;
-  if (copyDownOption=="true") {
-     k=3;
-  }
   dataRange = sheet.getRange(k, 1, sheet.getLastRow()-(k-1), sheet.getLastColumn());
   // Create one JavaScript object per row of data.
   var objects = formMule_getRowsData(sheet, dataRange, 1);
   // For every row object, create a personalized email from a template and send
   // it to the appropriate person.
   for (var j = 0; j < objects.length; ++j) {
+    if ((properties.copyDownFormulas == "true")&&(!copyDownFormulasCol)) { //self-repair if spreadsheet header for copydown of formulas has been deleted
+      returnCopydownStatusColIndex();
+      break;
+    }
+    if (((properties.copyDownFormulas == "true")||(copyDownFormulasCol))&&(objects[j].formulaCopyDownStatus == "")) {
+      copyDownFormulas(j+k, properties);
+      var thisRowRange = sheet.getRange(j+k, 1, 1, sheet.getLastColumn());
+      objects[j] = formMule_getRowsData(sheet, thisRowRange, 1);
+    }
     var error = false;
     // Get a row object
     var rowData = objects[j];        
