@@ -22,6 +22,10 @@ function formMule_checkForSourceChanges() {
 // This code was borrowed and modified from the Flubaroo Script author Dave Abouav
 // It anonymously tracks script usage to Google Analytics, allowing our non-profit to report our impact to funders
 // For original source see http://www.edcode.org
+function formMule_institutionalTrackingUi() {
+  NVSL.openInstitutionalTrackingUi();
+}
+
 
 function formMule_logCalEvent()
 {
