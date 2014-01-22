@@ -21,14 +21,16 @@ function getSystemName() {
   var rootFolderId = DocsList.getRootFolder().getId();
   for (var i=0; i<maxIterations; i++) {
     var thisParent = parents[i];
-    if (thisParent.getId()!=rootFolderId) {
-      var theseSpreadsheets = thisParent.getFilesByType('spreadsheet');
-      for (var i=0; i<theseSpreadsheets.length; i++) {
-        var thisName = theseSpreadsheets[i].getName();
-        if (thisName == "Read Me") {
-          found = true;
-          var readMeSS = SpreadsheetApp.openById(theseSpreadsheets[i].getId());
-          break;
+    if ((parents.length>0)&&(thisParent)) {
+      if (thisParent.getId()!=rootFolderId) {
+        var theseSpreadsheets = thisParent.getFilesByType('spreadsheet');
+        for (var i=0; i<theseSpreadsheets.length; i++) {
+          var thisName = theseSpreadsheets[i].getName();
+          if (thisName == "Read Me") {
+            found = true;
+            var readMeSS = SpreadsheetApp.openById(theseSpreadsheets[i].getId());
+            break;
+          }
         }
       }
     }
