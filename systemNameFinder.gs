@@ -24,11 +24,11 @@ function getSystemName() {
     if ((parents.length>0)&&(thisParent)) {
       if (thisParent.getId()!=rootFolderId) {
         var theseSpreadsheets = thisParent.getFilesByType('spreadsheet');
-        for (var i=0; i<theseSpreadsheets.length; i++) {
-          var thisName = theseSpreadsheets[i].getName();
+        for (var j=0; j<theseSpreadsheets.length; j++) {
+          var thisName = theseSpreadsheets[j].getName();
           if (thisName == "Read Me") {
             found = true;
-            var readMeSS = SpreadsheetApp.openById(theseSpreadsheets[i].getId());
+            var readMeSS = SpreadsheetApp.openById(theseSpreadsheets[j].getId());
             break;
           }
         }
@@ -57,3 +57,5 @@ function getSystemName() {
     return;
   } 
 }
+
+
