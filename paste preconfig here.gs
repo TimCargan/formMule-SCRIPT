@@ -1,5 +1,5 @@
 function formMule_preconfig() {
-setSystemName();  //look to see if this script is embedded in a spreadsheet that is part of a larger, pre-packaged system
+NVSL.setSystemName();  //look to see if this script is embedded in a spreadsheet that is part of a larger, pre-packaged system
 // if you are interested in sharing your complete workflow system for others to copy (with script settings)
 // Select the "Generate preconfig()" option in the menu and
 //#######Paste preconfiguration code below before sharing your system for copy#######
