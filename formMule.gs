@@ -1,6 +1,6 @@
-var scriptTitle = "formMule Script V6.5.2 (1/22/14)";
+var scriptTitle = "formMule Script V6.5.3 (1/30/14)";
 var scriptName = 'formMule'
-var analyticsId = 'UA-30976195-1'
+var scriptTrackingId = 'UA-30976195-1'
 // Written by Andrew Stillman for New Visions for Public Schools
 // Published under GNU General Public License, version 3 (GPL-3.0)
 // See restrictions at http://www.opensource.org/licenses/gpl-3.0.html
@@ -74,7 +74,6 @@ function formMule_quitUi(e) {
 
 
 function formMule_completeInstall() {
-  setFormMuleSid();
   formMule_preconfig();
   ScriptProperties.setProperty('installedFlag', 'true');
   var triggers = ScriptApp.getScriptTriggers();
@@ -2043,6 +2042,7 @@ function formMule_isDigit(char) {
 
 
 function formMule_defineSettings() {
+  setSid();
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheets = ss.getSheets();
   var app = UiApp.createApplication().setTitle("Step 1: Define merge source settings").setHeight(300);
