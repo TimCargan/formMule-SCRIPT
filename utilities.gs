@@ -22,6 +22,7 @@ function formMule_checkForSourceChanges() {
 // This code was borrowed and modified from the Flubaroo Script author Dave Abouav
 // It anonymously tracks script usage to Google Analytics, allowing our non-profit to report our impact to funders
 // For original source see http://www.edcode.org
+
 function formMule_institutionalTrackingUi() {
   NVSL.openInstitutionalTrackingUi();
 }
@@ -61,35 +62,33 @@ function formMule_logEmail()
 }
 
 
-function formMule_logRepeatInstall()
-{
+function logRepeatInstall() {
   var systemName = ScriptProperties.getProperty("systemName")
   NVSL.log("Repeat%20Install", scriptName, scriptTrackingId, systemName)
 }
 
-function formMule_logFirstInstall()
-{
+function logFirstInstall() {
   var systemName = ScriptProperties.getProperty("systemName")
   NVSL.log("First%20Install", scriptName, scriptTrackingId, systemName)
 }
 
-function setFormMuleSid()
-{ 
-  var formmule_sid = ScriptProperties.getProperty("formmule_sid");
-  if (formmule_sid == null || formmule_sid == "")
+
+function setSid() { 
+  var scriptNameLower = scriptName.toLowerCase();
+  var sid = ScriptProperties.getProperty(scriptNameLower + "_sid");
+  if (sid == null || sid == "")
   {
-    // user has never installed formMule before (in any spreadsheet)
     var dt = new Date();
     var ms = dt.getTime();
     var ms_str = ms.toString();
-    ScriptProperties.setProperty("formmule_sid", ms_str);
-    var formmule_uid = UserProperties.getProperty("formmule_uid");
-    if (formmule_uid != null && formmule_uid != "") {
-      formMule_logRepeatInstall();
+    ScriptProperties.setProperty(scriptNameLower + "_sid", ms_str);
+    var uid = UserProperties.getProperty(scriptNameLower + "_uid");
+    if (uid) {
+      logRepeatInstall();
     } else {
-      formMule_logFirstInstall();
-      UserProperties.setProperty('formmule_uid', ms_str);
-    }
+      logFirstInstall();
+      UserProperties.setProperty(scriptNameLower + "_uid", ms_str);
+    }      
   }
 }
 
