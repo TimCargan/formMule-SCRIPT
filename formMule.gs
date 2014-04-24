@@ -767,7 +767,6 @@ function formMule_onFormSubmit () {
   var sheet = ss.getSheetByName(sheetName);
   var headers = formMule_fetchHeaders(sheet);
   var caseNoSetting = ScriptProperties.getProperty('caseNoSetting');
-  copyDownFormulas(submissionRow, properties);
   if (caseNoSetting == "true") {
     var headers = formMule_fetchHeaders(sheet);
     var caseNoIndex = headers.indexOf("Case No");
@@ -777,6 +776,7 @@ function formMule_onFormSubmit () {
       cellRange.setValue(formMule_assignCaseNo());
     }
   }
+  copyDownFormulas(submissionRow, properties);
   formMule_sendEmailsAndSetAppointments();
   lock.releaseLock();
 }
