@@ -1,4 +1,4 @@
-var scriptTitle = "formMule Script V6.5.4 (4/12/14)";
+var scriptTitle = "formMule Script V6.6.1 (5/1/15)";
 var scriptName = 'formMule'
 var scriptTrackingId = 'UA-30976195-1'
 // Written by Andrew Stillman for New Visions for Public Schools
@@ -20,10 +20,10 @@ function onInstall () {
 
 function onOpen() {
   var menuEntries = [];
-  var installed = ScriptProperties.getProperty('installedFlag');
-  var sheetName = ScriptProperties.getProperty('sheetName');
-  var webAppUrl = ScriptProperties.getProperty('webAppUrl');
-  var twilioNumber = ScriptProperties.getProperty('twilioNumber');
+  var installed = PropertiesService.getDocumentProperties().getProperty('installedFlag');
+  var sheetName = PropertiesService.getDocumentProperties().getProperty('sheetName');
+  var webAppUrl = PropertiesService.getDocumentProperties().getProperty('webAppUrl');
+  var twilioNumber = PropertiesService.getDocumentProperties().getProperty('twilioNumber');
   if (!(installed)) {
       menuEntries.push({name: "Run initial installation", functionName: "formMule_completeInstall"});
   } else {
@@ -75,7 +75,7 @@ function formMule_quitUi(e) {
 
 function formMule_completeInstall() {
   formMule_preconfig();
-  ScriptProperties.setProperty('installedFlag', 'true');
+  PropertiesService.getDocumentProperties().setProperty('installedFlag', 'true');
   var triggers = ScriptApp.getScriptTriggers();
   var formTriggerSetFlag = false;
   var editTriggerSetFlag = false;
@@ -123,11 +123,11 @@ function formMule_setEditTrigger() {
 function formMule_lockFormulaRow() {
 // setFrozenRows function was once broken in Apps Script...seeing if it's fixed.
 var ss = SpreadsheetApp.getActiveSpreadsheet();
-var sheetName = ScriptProperties.getProperty('sheetName');
+var sheetName = PropertiesService.getDocumentProperties().getProperty('sheetName');
 var sheet = ss.getSheetByName(sheetName);
 sheet.setFrozenRows(2);
 var ss = SpreadsheetApp.getActiveSpreadsheet();
-var sheetName = ScriptProperties.getProperty('sheetName');
+var sheetName = PropertiesService.getDocumentProperties().getProperty('sheetName');
 var sheet = ss.getSheetByName(sheetName)
 ss.setActiveSheet(sheet);
   var frozenRows = sheet.getFrozenRows();
@@ -138,19 +138,19 @@ ss.setActiveSheet(sheet);
 
 
 function formMule_setCalendarSettings () {
-  var calendarStatus = ScriptProperties.getProperty('calendarStatus');
-  var calendarUpdateStatus = ScriptProperties.getProperty('calendarUpdateStatus');
-  var calendarToken  = ScriptProperties.getProperty('calendarToken');
-  var eventTitleToken = ScriptProperties.getProperty('eventTitleToken');
-  var locationToken = ScriptProperties.getProperty('locationToken');
-  var guests = ScriptProperties.getProperty('guests');
-  var emailInvites = ScriptProperties.getProperty('emailInvites');
-  var allDay = ScriptProperties.getProperty('allDay');
-  var startTimeToken = ScriptProperties.getProperty('startTimeToken');
-  var endTimeToken = ScriptProperties.getProperty('endTimeToken');
-  var descToken = ScriptProperties.getProperty('descToken');
-  var reminderType = ScriptProperties.getProperty('reminderType');
-  var minBefore = ScriptProperties.getProperty('minBefore');
+  var calendarStatus = PropertiesService.getDocumentProperties().getProperty('calendarStatus');
+  var calendarUpdateStatus = PropertiesService.getDocumentProperties().getProperty('calendarUpdateStatus');
+  var calendarToken  = PropertiesService.getDocumentProperties().getProperty('calendarToken');
+  var eventTitleToken = PropertiesService.getDocumentProperties().getProperty('eventTitleToken');
+  var locationToken = PropertiesService.getDocumentProperties().getProperty('locationToken');
+  var guests = PropertiesService.getDocumentProperties().getProperty('guests');
+  var emailInvites = PropertiesService.getDocumentProperties().getProperty('emailInvites');
+  var allDay = PropertiesService.getDocumentProperties().getProperty('allDay');
+  var startTimeToken = PropertiesService.getDocumentProperties().getProperty('startTimeToken');
+  var endTimeToken = PropertiesService.getDocumentProperties().getProperty('endTimeToken');
+  var descToken = PropertiesService.getDocumentProperties().getProperty('descToken');
+  var reminderType = PropertiesService.getDocumentProperties().getProperty('reminderType');
+  var minBefore = PropertiesService.getDocumentProperties().getProperty('minBefore');
  
   var app = UiApp.createApplication().setTitle('Step 2b: Set up calendar merge').setHeight(450).setWidth(800);
   var panel = app.createHorizontalPanel().setId('calendarPanel').setSpacing(20).setStyleAttribute('borderColor', 'grey');
@@ -166,7 +166,7 @@ function formMule_setCalendarSettings () {
   var conditionLabel = app.createLabel('Create Event Condition');
   var dropdown = app.createListBox().setId('col-0').setName('col-0').setWidth("150px").setEnabled(false);
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sourceSheetName = ScriptProperties.getProperty('sheetName');
+  var sourceSheetName = PropertiesService.getDocumentProperties().getProperty('sheetName');
   if ((sourceSheetName)&&(sourceSheetName!='')) {
      var sourceSheet = ss.getSheetByName(sourceSheetName);
   } else {
@@ -203,7 +203,7 @@ function formMule_setCalendarSettings () {
   createPanel.add(conditionsGrid);
   createPanel.add(extraHelp1);
   
-  var calendarConditionString = ScriptProperties.getProperty('calendarConditions');
+  var calendarConditionString = PropertiesService.getDocumentProperties().getProperty('calendarConditions');
   if ((calendarConditionString)&&(calendarConditionString!='')) {
     var calendarConditionsObject = Utilities.jsonParse(calendarConditionString);
     var selectedHeader = calendarConditionsObject['col-0'];
@@ -249,7 +249,7 @@ function formMule_setCalendarSettings () {
   updateConditionsGrid.setWidget(0, 2, conditionHelp);
   updateConditionsGrid.setWidget(2, 2, deleteConditionHelp);
   
-  var calendarUpdateConditionString = ScriptProperties.getProperty('calendarUpdateConditions');
+  var calendarUpdateConditionString = PropertiesService.getDocumentProperties().getProperty('calendarUpdateConditions');
   if ((calendarUpdateConditionString)&&(calendarUpdateConditionString!='')) {
     var calendarUpdateConditionsObject = Utilities.jsonParse(calendarUpdateConditionString);
     var selectedUpdateHeader = calendarUpdateConditionsObject['col-0'];
@@ -265,7 +265,7 @@ function formMule_setCalendarSettings () {
     updateTextbox.setValue(selectedValue);
   }
   
-  var calendarDeleteConditionString = ScriptProperties.getProperty('calendarDeleteConditions');
+  var calendarDeleteConditionString = PropertiesService.getDocumentProperties().getProperty('calendarDeleteConditions');
   if ((calendarDeleteConditionString)&&(calendarDeleteConditionString!='')) {
     var calendarDeleteConditionsObject = Utilities.jsonParse(calendarDeleteConditionString);
     var selectedDeleteHeader = calendarDeleteConditionsObject['col-0'];
@@ -288,7 +288,7 @@ function formMule_setCalendarSettings () {
   for (var i=0; i<headers.length; i++) {
     eventIdCol.addItem(headers[i]);
   } 
-  var selectedEventIdHeader = ScriptProperties.getProperty('eventIdCol');
+  var selectedEventIdHeader = PropertiesService.getDocumentProperties().getProperty('eventIdCol');
   var eventIdExists = headers.indexOf("Event Id");
   if (eventIdExists==-1) {
     eventIdCol.addItem('Event Id');
@@ -381,13 +381,13 @@ function formMule_setCalendarSettings () {
   }
   var repeatLabel = app.createLabel('Repeat for how many weeks (leave blank for single event)');
   var repeatTextBox = app.createTextBox().setName('calendarWeeklyRepeats');
-  var calendarWeeklyRepeats = ScriptProperties.getProperty('calendarWeeklyRepeats');
+  var calendarWeeklyRepeats = PropertiesService.getDocumentProperties().getProperty('calendarWeeklyRepeats');
   if (calendarWeeklyRepeats) {
     repeatTextBox.setValue(calendarWeeklyRepeats)
   }
   var daysLabel = app.createLabel('Comma separated days of the week to repeat the event on (e.g. Monday,Wednesday)');
   var daysBox = app.createTextBox().setName('calendarWeekdays');
-  var calendarWeekdays = ScriptProperties.getProperty('calendarWeekdays');
+  var calendarWeekdays = PropertiesService.getDocumentProperties().getProperty('calendarWeekdays');
   if (calendarWeekdays) {
     daysBox.setValue(calendarWeekdays);
   }
@@ -419,7 +419,7 @@ function formMule_setCalendarSettings () {
   var clickHandler1 = app.createServerHandler('toggle1').addCallbackElement(topSettingsGrid);
   checkBox.addValueChangeHandler(clickHandler1);
       
-  var calTrigger = ScriptProperties.getProperty('calTrigger');
+  var calTrigger = PropertiesService.getDocumentProperties().getProperty('calTrigger');
   var calTriggerCheckBox = app.createCheckBox().setText("Trigger event creation on form submit.").setId('calTriggerCheckBox').setName('calTrigger').setStyleAttribute('color', '#0099FF').setStyleAttribute('fontWeight', 'bold').setEnabled(false);
   if (calTrigger=="true") {
     calTriggerCheckBox.setValue(true);
@@ -440,7 +440,7 @@ function formMule_setCalendarSettings () {
   var clickHandler2 = app.createServerHandler('toggle2').addCallbackElement(topSettingsGrid);
   updateCheckBox.addValueChangeHandler(clickHandler2);
   
-  var calUpdateTrigger = ScriptProperties.getProperty('calUpdateTrigger');
+  var calUpdateTrigger = PropertiesService.getDocumentProperties().getProperty('calUpdateTrigger');
   var calUpdateTriggerCheckBox = app.createCheckBox().setText("Trigger event update on form submit.").setId('calUpdateTriggerCheckBox').setName('calUpdateTrigger').setStyleAttribute('color', '#66C285').setStyleAttribute('fontWeight', 'bold').setEnabled(false);
   if (calUpdateTrigger=="true") {
     calUpdateTriggerCheckBox.setValue(true);
@@ -565,7 +565,7 @@ function toggle2(e) {
 
 
 function formMule_getAvailableTags() {
-  var sheetName = ScriptProperties.getProperty("sheetName");
+  var sheetName = PropertiesService.getDocumentProperties().getProperty("sheetName");
   var sheet = ss.getSheetByName(sheetName);
   if (!sheet) {
     Browser.msgBox('You must select a source data sheet before this menu item can be selected.');
@@ -622,31 +622,31 @@ function formMule_fetchHeaders(sheet) {
 function formMule_saveCalendarSettings (e) {
   var app = UiApp.getActiveApplication();
   var calendarStatus = e.parameter.calendarStatus;
-  ScriptProperties.setProperty('calendarStatus', calendarStatus);
+  PropertiesService.getDocumentProperties().setProperty('calendarStatus', calendarStatus);
   var calendarUpdateStatus = e.parameter.calendarUpdateStatus;
-  ScriptProperties.setProperty('calendarUpdateStatus', calendarUpdateStatus);
+  PropertiesService.getDocumentProperties().setProperty('calendarUpdateStatus', calendarUpdateStatus);
   var calTrigger = e.parameter.calTrigger;
-  ScriptProperties.setProperty('calTrigger', calTrigger);
+  PropertiesService.getDocumentProperties().setProperty('calTrigger', calTrigger);
   var calUpdateTrigger = e.parameter.calUpdateTrigger;
-  ScriptProperties.setProperty('calUpdateTrigger', calUpdateTrigger);
+  PropertiesService.getDocumentProperties().setProperty('calUpdateTrigger', calUpdateTrigger);
   var conditionObject = new Object();
   conditionObject['col-0'] = e.parameter['col-0'];
   conditionObject['val-0'] = e.parameter['val-0'].trim();
   conditionObject['sht-0'] = "Event Creation";
   var conditionString = Utilities.jsonStringify(conditionObject);
-  ScriptProperties.setProperty('calendarConditions', conditionString);
+  PropertiesService.getDocumentProperties().setProperty('calendarConditions', conditionString);
   var updateConditionObject = new Object();
   updateConditionObject['col-0'] = e.parameter['update-col-0'];
   updateConditionObject['val-0'] = e.parameter['update-val-0'].trim();
   updateConditionObject['sht-0'] = "Event Update";
   var updateConditionString = Utilities.jsonStringify(updateConditionObject);
-  ScriptProperties.setProperty('calendarUpdateConditions', updateConditionString);
+  PropertiesService.getDocumentProperties().setProperty('calendarUpdateConditions', updateConditionString);
   var deleteConditionObject = new Object();
   deleteConditionObject['col-0'] = e.parameter['delete-col-0'];
   deleteConditionObject['val-0'] = e.parameter['delete-val-0'].trim();
   deleteConditionObject['sht-0'] = "Event Update";
   var deleteConditionString = Utilities.jsonStringify(deleteConditionObject);
-  ScriptProperties.setProperty('calendarDeleteConditions', deleteConditionString);
+  PropertiesService.getDocumentProperties().setProperty('calendarDeleteConditions', deleteConditionString);
   
   //check for illegal choices
   if ((e.parameter.calendarStatus=="true")&&(e.parameter.calendarUpdateStatus=="true")&&(e.parameter['col-0']==e.parameter['update-col-0'])&&(e.parameter['val-0']==e.parameter['update-val-0'])&&(e.parameter['update-val-0']!='')) {
@@ -670,8 +670,8 @@ function formMule_saveCalendarSettings (e) {
   }  
   
   var eventIdCol = e.parameter.eventIdCol;
-  ScriptProperties.setProperty('eventIdCol', eventIdCol);
-  var sheetName = ScriptProperties.getProperty('sheetName');
+  PropertiesService.getDocumentProperties().setProperty('eventIdCol', eventIdCol);
+  var sheetName = PropertiesService.getDocumentProperties().getProperty('sheetName');
   var sheet = ss.getSheetByName(sheetName);
   var headers = formMule_fetchHeaders(sheet);
   if (calendarStatus=="true") {
@@ -682,13 +682,13 @@ function formMule_saveCalendarSettings (e) {
       var lastCol = sheet.getLastColumn();
       sheet.insertColumnAfter(lastCol);
       sheet.getRange(1, lastCol+1).setValue('Event Id').setBackground("#0099FF").setFontColor("black").setComment("Don't change the name of this column.");
-      var copyDownOption = ScriptProperties.getProperty('copyDownOption');
+      var copyDownOption = PropertiesService.getDocumentProperties().getProperty('copyDownOption');
       if (copyDownOption=="true") {
         sheet.getRange(2, lastCol+1).setValue('N/A: This is the formula row.').setBackground("#0099FF").setFontColor("black");
       }
       sheet.insertColumnAfter(lastCol+1);
       sheet.getRange(1, lastCol+2).setValue('Event Creation Status').setBackground("#0099FF").setFontColor("black").setComment("Don't change the name of this column.");
-      var copyDownOption = ScriptProperties.getProperty('copyDownOption');
+      var copyDownOption = PropertiesService.getDocumentProperties().getProperty('copyDownOption');
       if (copyDownOption=="true") {
         sheet.getRange(2, lastCol+2).setValue('N/A: This is the formula row.').setBackground("#0099FF").setFontColor("black");
       }
@@ -702,7 +702,7 @@ function formMule_saveCalendarSettings (e) {
       var lastCol = sheet.getLastColumn();
       sheet.insertColumnAfter(lastCol);
       sheet.getRange(1, lastCol+1).setValue('Event Update Status').setBackground("#66C285").setFontColor("black").setComment("Don't change the name of this column.");
-      var copyDownOption = ScriptProperties.getProperty('copyDownOption');
+      var copyDownOption = PropertiesService.getDocumentProperties().getProperty('copyDownOption');
       if (copyDownOption=="true") {
         sheet.getRange(2, lastCol+1).setValue('N/A: This is the formula row.').setBackground("#66C285").setFontColor("black");
       }
@@ -723,19 +723,19 @@ function formMule_saveCalendarSettings (e) {
     var calendarWeeklyRepeats = e.parameter.calendarWeeklyRepeats;
     var calendarWeekdays = e.parameter.calendarWeekdays;
   
-    ScriptProperties.setProperty('calendarToken', calendarToken);
-    ScriptProperties.setProperty('eventTitleToken', eventTitleToken);
-    ScriptProperties.setProperty('locationToken', locationToken);
-    ScriptProperties.setProperty('guests', guests);
-    ScriptProperties.setProperty('emailInvites', emailInvites);
-    ScriptProperties.setProperty('allDay', allDay);
-    ScriptProperties.setProperty('startTimeToken', startTimeToken);
-    ScriptProperties.setProperty('endTimeToken', endTimeToken);
-    ScriptProperties.setProperty('descToken', descToken);
-    ScriptProperties.setProperty('reminderType', reminderType);
-    ScriptProperties.setProperty('minBefore', minBefore);
-    ScriptProperties.setProperty('calendarWeeklyRepeats', calendarWeeklyRepeats);
-    ScriptProperties.setProperty('calendarWeekdays', calendarWeekdays);
+    PropertiesService.getDocumentProperties().setProperty('calendarToken', calendarToken);
+    PropertiesService.getDocumentProperties().setProperty('eventTitleToken', eventTitleToken);
+    PropertiesService.getDocumentProperties().setProperty('locationToken', locationToken);
+    PropertiesService.getDocumentProperties().setProperty('guests', guests);
+    PropertiesService.getDocumentProperties().setProperty('emailInvites', emailInvites);
+    PropertiesService.getDocumentProperties().setProperty('allDay', allDay);
+    PropertiesService.getDocumentProperties().setProperty('startTimeToken', startTimeToken);
+    PropertiesService.getDocumentProperties().setProperty('endTimeToken', endTimeToken);
+    PropertiesService.getDocumentProperties().setProperty('descToken', descToken);
+    PropertiesService.getDocumentProperties().setProperty('reminderType', reminderType);
+    PropertiesService.getDocumentProperties().setProperty('minBefore', minBefore);
+    PropertiesService.getDocumentProperties().setProperty('calendarWeeklyRepeats', calendarWeeklyRepeats);
+    PropertiesService.getDocumentProperties().setProperty('calendarWeekdays', calendarWeekdays);
   
     var errMsg = '';
     if (calendarToken=='') { errMsg += "You forgot to enter a Calendar Id, "; }
@@ -755,7 +755,7 @@ function formMule_saveCalendarSettings (e) {
   
 
 function formMule_onFormSubmit () {
-  var properties = ScriptProperties.getProperties();
+  var properties = PropertiesService.getDocumentProperties().getProperties();
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   if (!ss) {
      ss = SpreadsheetApp.openById(properties.ssId);
@@ -763,10 +763,10 @@ function formMule_onFormSubmit () {
   var submissionRow = ss.getActiveRange().getRow();
   var lock = LockService.getPublicLock();
   lock.waitLock(120000);
-  var sheetName = ScriptProperties.getProperty('sheetName');
+  var sheetName = PropertiesService.getDocumentProperties().getProperty('sheetName');
   var sheet = ss.getSheetByName(sheetName);
   var headers = formMule_fetchHeaders(sheet);
-  var caseNoSetting = ScriptProperties.getProperty('caseNoSetting');
+  var caseNoSetting = PropertiesService.getDocumentProperties().getProperty('caseNoSetting');
   if (caseNoSetting == "true") {
     var headers = formMule_fetchHeaders(sheet);
     var caseNoIndex = headers.indexOf("Case No");
@@ -796,14 +796,14 @@ function formMule_assignCaseNo(resetToValue) {
   if (resetToValue) {
   var caseNo = resetToValue;
   } else { 
-  var caseNo = ScriptProperties.getProperty('caseNo')
+  var caseNo = PropertiesService.getDocumentProperties().getProperty('caseNo')
   };
   if(caseNo==null) {
-      ScriptProperties.setProperty('caseNo','0');
+      PropertiesService.getDocumentProperties().setProperty('caseNo','0');
       caseNo = 0;
    } else {
    caseNo = parseInt(caseNo) + 1;
-   ScriptProperties.setProperty('caseNo', caseNo);
+   PropertiesService.getDocumentProperties().setProperty('caseNo', caseNo);
   }
 return caseNo; 
 }
@@ -819,12 +819,12 @@ function formMule_emailSettings () {
   app.add(helpPopup);
   
  
-  var emailStatus = ScriptProperties.getProperty('emailStatus');
+  var emailStatus = PropertiesService.getDocumentProperties().getProperty('emailStatus');
   var emailStatusCheckBox = app.createCheckBox().setText('Turn-on email merge feature').setName('emailStatus').setStyleAttribute('color', '#FF9999').setStyleAttribute('fontWeight','bold');
   if (emailStatus=="true") {
     emailStatusCheckBox.setValue(true);
   }
-  var emailTrigger = ScriptProperties.getProperty('emailTrigger');
+  var emailTrigger = PropertiesService.getDocumentProperties().getProperty('emailTrigger');
   var emailTriggerCheckBox = app.createCheckBox().setText('Trigger this feature on form submit').setName('emailTrigger').setStyleAttribute('color', '#FF9999').setStyleAttribute('fontWeight','bold');
   if (emailTrigger=="true") {
     emailTriggerCheckBox.setValue(true);
@@ -840,7 +840,7 @@ function formMule_emailSettings () {
   numSelect.addItem('4');
   numSelect.addItem('5');
   numSelect.addItem('6');
-  var preSelectedNum = ScriptProperties.getProperty('numSelected');
+  var preSelectedNum = PropertiesService.getDocumentProperties().getProperty('numSelected');
   switch (preSelectedNum) {
     case "1":
      numSelect.setSelectedIndex(0);
@@ -893,7 +893,7 @@ function formMule_emailSettings () {
 
 function formMule_setEmailConditionGrid(app) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sourceSheetName = ScriptProperties.getProperty('sheetName');
+  var sourceSheetName = PropertiesService.getDocumentProperties().getProperty('sheetName');
   if ((!sourceSheetName)||(sourceSheetName=='')) {
     Browser.msgBox('You must select a source data sheet before this menu item can be selected.');
     formMule_defineSettings();
@@ -904,7 +904,7 @@ function formMule_setEmailConditionGrid(app) {
   }
   var lastCol = sourceSheet.getLastColumn();
   var headers = sourceSheet.getRange(1, 1, 1, lastCol).getValues()[0];
-  var numSelected = ScriptProperties.getProperty('numSelected');
+  var numSelected = PropertiesService.getDocumentProperties().getProperty('numSelected');
   if ((!numSelected)||(numSelected=='')) {
     numSelected = 1;
   }
@@ -932,7 +932,7 @@ function formMule_setEmailConditionGrid(app) {
     grid.setWidget(i+1, 3, app.createLabel('='));
     grid.setWidget(i+1, 4, textbox[i]);
   }
-  var emailConditions = ScriptProperties.getProperty('emailConditions');
+  var emailConditions = PropertiesService.getDocumentProperties().getProperty('emailConditions');
   if ((emailConditions)&&(emailConditions!='')) {
     emailConditions = Utilities.jsonParse(emailConditions);
     numSelected = parseInt(numSelected);
@@ -965,9 +965,9 @@ function formMule_refreshEmailConditions(e) {
   var app = UiApp.getActiveApplication();
   var grid = app.getElementById('emailConditionGrid');
   var numSelected = e.parameter.numSelectValue;
-  var oldNumSelected = ScriptProperties.getProperty('numSelected');
+  var oldNumSelected = PropertiesService.getDocumentProperties().getProperty('numSelected');
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sourceSheetName = ScriptProperties.getProperty('sheetName');
+  var sourceSheetName = PropertiesService.getDocumentProperties().getProperty('sheetName');
   if ((!sourceSheetName)||(sourceSheetName=='')) {
     var sourceSheet = ss.getSheets()[0];
   } else {
@@ -1219,8 +1219,8 @@ function formMule_saveEmailSettings(e) {
   var app = UiApp.getActiveApplication();
   var emailStatus = e.parameter.emailStatus;
   var emailTrigger = e.parameter.emailTrigger;
-  ScriptProperties.setProperty('emailStatus', emailStatus);
-  ScriptProperties.setProperty('emailTrigger', emailTrigger);
+  PropertiesService.getDocumentProperties().setProperty('emailStatus', emailStatus);
+  PropertiesService.getDocumentProperties().setProperty('emailTrigger', emailTrigger);
   var numSelected = e.parameter.numSelectValue;
   var emailConditions = new Object();
   emailConditions["max"]=numSelected;
@@ -1234,13 +1234,13 @@ function formMule_saveEmailSettings(e) {
     emailConditions["sht-"+i] = templateName;
   }
   emailConditions = Utilities.jsonStringify(emailConditions);
-  ScriptProperties.setProperty('emailConditions', emailConditions);
+  PropertiesService.getDocumentProperties().setProperty('emailConditions', emailConditions);
   emailConditions = Utilities.jsonParse(emailConditions);
-  ScriptProperties.setProperty('numSelected', numSelected);
+  PropertiesService.getDocumentProperties().setProperty('numSelected', numSelected);
   var num = parseInt(numSelected);
   var sheets = ss.getSheets();
-  var sheetName = ScriptProperties.getProperty('sheetName');
-  var copyDownOption = ScriptProperties.getProperty('copyDownOption');
+  var sheetName = PropertiesService.getDocumentProperties().getProperty('sheetName');
+  var copyDownOption = PropertiesService.getDocumentProperties().getProperty('copyDownOption');
   var sheet = ss.getSheetByName(sheetName);
   var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
   for (var i=0; i<num; i++) {
@@ -1289,7 +1289,7 @@ function formMule_saveEmailSettings(e) {
 
 
 function formMule_setAvailableTags(templateSheet) {
-  var sheetName = ScriptProperties.getProperty('sheetName');
+  var sheetName = PropertiesService.getDocumentProperties().getProperty('sheetName');
   var sheet = ss.getSheetByName(sheetName);
   var lastCol = sheet.getLastColumn();
   if(lastCol==0){
@@ -1341,7 +1341,7 @@ function formMule_setAvailableTags(templateSheet) {
 function formMule_sendEmailsAndSetAppointments(manual) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var timeZone = ss.getSpreadsheetTimeZone();
-  var properties = ScriptProperties.getProperties();
+  var properties = PropertiesService.getDocumentProperties().getProperties();
   var calendarStatus = properties.calendarStatus;
   var calendarUpdateStatus = properties.calendarUpdateStatus;
   var calTrigger = properties.calTrigger;
@@ -2055,8 +2055,8 @@ function formMule_defineSettings() {
       sheetChooser.addItem(sheets[i].getSheetName());   
       }
     }
-   if (ScriptProperties.getProperty('sheetName')) {
-   var sheetName = ScriptProperties.getProperty('sheetName');
+   if (PropertiesService.getDocumentProperties().getProperty('sheetName')) {
+   var sheetName = PropertiesService.getDocumentProperties().getProperty('sheetName');
    }
   if (sheetName) {
     var sheetIndex = formMule_getSheetIndex(sheetName);
@@ -2065,7 +2065,7 @@ function formMule_defineSettings() {
   
   var optionsLabel = app.createLabel("Optional").setStyleAttribute("background", "#E5E5E5").setStyleAttribute("marginTop", "20px").setStyleAttribute("padding", "5px");
  
-  var caseNoSetting = ScriptProperties.getProperty('caseNoSetting'); 
+  var caseNoSetting = PropertiesService.getDocumentProperties().getProperty('caseNoSetting'); 
   var caseNoCheckBox = app.createCheckBox().setId("caseNoCheckBox").setName("caseNoSetting").setText("Auto-create a unique case number for each form submission")
   if (caseNoSetting=="true") {
    caseNoCheckBox.setValue(true);
@@ -2105,9 +2105,9 @@ function formMule_defineSettings() {
 
 function formMule_saveSettings(e) {
   var app = UiApp.getActiveApplication();
-  var oldSheetName = ScriptProperties.getProperty('sheetName');
+  var oldSheetName = PropertiesService.getDocumentProperties().getProperty('sheetName');
   var sheetName = e.parameter.sheet;
-  ScriptProperties.setProperty('sheetName', sheetName);
+  PropertiesService.getDocumentProperties().setProperty('sheetName', sheetName);
   var sheet = ss.getSheetByName(sheetName);
   var headers = formMule_fetchHeaders(sheet);
   var lastCol = sheet.getLastColumn();
@@ -2120,9 +2120,9 @@ function formMule_saveSettings(e) {
   }
     
   var caseNoSetting = e.parameter.caseNoSetting;
-  ScriptProperties.setProperty('caseNoSetting', caseNoSetting);
+  PropertiesService.getDocumentProperties().setProperty('caseNoSetting', caseNoSetting);
   
-  var caseNo = ScriptProperties.getProperty('caseNo');
+  var caseNo = PropertiesService.getDocumentProperties().getProperty('caseNo');
   var caseNoIndex = headers.indexOf("Case No");
   
   if (caseNoSetting=="true") {
@@ -2139,7 +2139,7 @@ function formMule_saveSettings(e) {
   
   var lastCol = sheet.getLastColumn();
   
-  var sheetName = ScriptProperties.getProperty('sheetName');
+  var sheetName = PropertiesService.getDocumentProperties().getProperty('sheetName');
   if ((sheetName)&&(!(oldSheetName))) {
     onOpen();
     Browser.msgBox('Auto-email and auto-calendar-event options are now available in the formMule menu');
