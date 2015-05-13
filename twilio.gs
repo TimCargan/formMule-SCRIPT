@@ -34,7 +34,7 @@ function formMule_verifyPublic() {
 function formMule_howToPublishAsWebApp() {
   var app = UiApp.createApplication().setTitle('Step 2c. Set up SMS and Voice - Publish formMule as a web app').setHeight(540).setWidth(600);
   var thisSs = SpreadsheetApp.getActiveSpreadsheet();
-  ScriptProperties.setProperty('ssId', thisSs.getId());
+  PropertiesService.getDocumentProperties().setProperty('ssId', thisSs.getId());
   var public = formMule_verifyPublic();
   // Once it is determined that the webapp is public, proceed to Twilio setup instructions
   if (public=="TRUE") {
@@ -95,7 +95,7 @@ function formMule_howToSetUpTwilio() {
     app.close();
     return app;
   } else { 
-    ScriptProperties.setProperty('webAppUrl', url);
+    PropertiesService.getDocumentProperties().setProperty('webAppUrl', url);
   }
   link.setText(url).setEnabled(false).setWidth("400px").setStyleAttribute("margin", "10px 10px 10px 10px").setStyleAttribute("padding", "5px 5px 5px 5px");
   var text1 = app.createLabel("Instructions:").setStyleAttribute("width", "100%").setStyleAttribute("backgroundColor", "grey").setStyleAttribute("color", "white").setStyleAttribute("padding", "5px 5px 5px 5px");
@@ -111,13 +111,13 @@ function formMule_howToSetUpTwilio() {
   var fieldPanel = app.createGrid(1,4);
   var accountLabel = app.createLabel("Account SID");
   var accountLabelBox = app.createTextBox().setName('accountSID');
-  var accountSID = ScriptProperties.getProperty('accountSID');
+  var accountSID = PropertiesService.getDocumentProperties().getProperty('accountSID');
   if (accountSID) {
     accountLabelBox.setText(accountSID);
   }
   var authTokenLabel = app.createLabel("Auth Token");
   var authTokenBox = app.createTextBox().setName('authToken');
-  var authToken = ScriptProperties.getProperty('authToken');
+  var authToken = PropertiesService.getDocumentProperties().getProperty('authToken');
   if (authToken) {
     authTokenBox.setText(authToken);
   }
@@ -150,10 +150,10 @@ function formMule_saveTwilioSettings(e) {
   var authToken = e.parameter.authToken;
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var ssId = ss.getId();
-  ScriptProperties.setProperty("ssId", ssId);
+  PropertiesService.getDocumentProperties().setProperty("ssId", ssId);
   if ((accountSID!='')&&(authToken!='')) {
-    ScriptProperties.setProperty("accountSID", accountSID);
-    ScriptProperties.setProperty("authToken", authToken);
+    PropertiesService.getDocumentProperties().setProperty("accountSID", accountSID);
+    PropertiesService.getDocumentProperties().setProperty("authToken", authToken);
   }
   var grid = app.getElementById("grid");
   var numberList  = app.createListBox().setName("twilioNumber");
@@ -173,7 +173,7 @@ function formMule_saveTwilioSettings(e) {
     button.setEnabled(true);
     testButton.setEnabled(false);
     grid.setWidget(10, 0, app.createLabel("Twilio phone number(s) successfully detected. If more than one, select which one you want this script to use."));
-    var twilioNumber = ScriptProperties.getProperty('twilioNumber');
+    var twilioNumber = PropertiesService.getDocumentProperties().getProperty('twilioNumber');
     if ((twilioNumber)&&(phoneNumbers.indexOf(twilioNumber)!=-1)) {
       numberList.setSelectedIndex(phoneNumbers.indexOf(twilioNumber));
     }
@@ -184,7 +184,7 @@ function formMule_saveTwilioSettings(e) {
     for (var i=0; i<langList.length; i++) {
       langSelectBox.addItem(langList[i]);
     }
-    var langSelected = ScriptProperties.getProperty('defaultVoiceLang');
+    var langSelected = PropertiesService.getDocumentProperties().getProperty('defaultVoiceLang');
     if (langSelected) {
       var index = langList.indexOf(langSelected);
       if (index!=-1) {
@@ -201,9 +201,9 @@ function formMule_saveTwilioSettings(e) {
 function formMule_saveTwilioNumber(e) {
   var app = UiApp.getActiveApplication();
   var twilioNumber = e.parameter.twilioNumber;
-  ScriptProperties.setProperty('twilioNumber', twilioNumber);
+  PropertiesService.getDocumentProperties().setProperty('twilioNumber', twilioNumber);
   var defaultLang = e.parameter.defaultLang;
-  ScriptProperties.setProperty('defaultVoiceLang', defaultLang);
+  PropertiesService.getDocumentProperties().setProperty('defaultVoiceLang', defaultLang);
   onOpen();
   Browser.msgBox("Nice work! Now for a bit of magic: Try texting \n \"Woot woot\" to " + twilioNumber + " to see if the script is able to receive and send text messages");
   app.close();
@@ -212,17 +212,17 @@ function formMule_saveTwilioNumber(e) {
 
 
 function formMule_smsAndVoiceSettings(tabIndex) {
-  var properties = ScriptProperties.getProperties();
+  var properties = PropertiesService.getDocumentProperties().getProperties();
   if (!tabIndex) { 
     tabIndex = 0;
   }
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheetName = ScriptProperties.getProperty('sheetName');
+  var sheetName = PropertiesService.getDocumentProperties().getProperty('sheetName');
   var sheet = ss.getSheetByName(sheetName);
   if (!sheet) {
     sheet = ss.getSheets()[0];
     sheetName = sheet.getName();
-    ScriptProperties.setProperty('sheetName', sheetName);
+    PropertiesService.getDocumentProperties().setProperty('sheetName', sheetName);
     Browser.msgBox("No source sheet detected. Source was automatically set to the top sheet: " + sheetName);
   }
   try {
@@ -713,10 +713,10 @@ function refreshVmSoundFilePlayLink(e) {
 function refreshSmsTemplateGrid(e) {
   var app = UiApp.getActiveApplication();
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheetName = ScriptProperties.getProperty('sheetName');
+  var sheetName = PropertiesService.getDocumentProperties().getProperty('sheetName');
   var sheet = ss.getSheetByName(sheetName);
   var headers = sheet.getRange(1,1,1,sheet.getLastColumn()).getValues()[0];
-  var properties = ScriptProperties.getProperties();
+  var properties = PropertiesService.getDocumentProperties().getProperties();
   var smsNumSelected = e.parameter.smsNumSelected;
   properties.smsNumSelected = smsNumSelected;
   
@@ -789,7 +789,7 @@ function refreshVmTemplateGrid(e) {
   var app = UiApp.getActiveApplication();
   var mainPanel = app.getElementById("mainPanel");
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheetName = ScriptProperties.getProperty('sheetName');
+  var sheetName = PropertiesService.getDocumentProperties().getProperty('sheetName');
   var sheet = ss.getSheetByName(sheetName);
   var recordingSheet = ss.getSheetByName("MyVoiceRecordings");
   var headers = sheet.getRange(1,1,1,sheet.getLastColumn()).getValues()[0];
@@ -799,7 +799,7 @@ function refreshVmTemplateGrid(e) {
     recordingSelectTexts = recordingSheet.getRange(2, 1, recordingSheet.getLastRow()-1, 1).getValues();
     recordingSelectValues = recordingSheet.getRange(2, 2, recordingSheet.getLastRow()-1, 1).getValues();
   } 
-  var properties = ScriptProperties.getProperties();
+  var properties = PropertiesService.getDocumentProperties().getProperties();
   var vmNumSelected = e.parameter.vmNumSelected;
   properties.vmNumSelected = vmNumSelected;
   var vmTemplateGrid = app.getElementById('vmTemplateGrid');
@@ -940,7 +940,7 @@ function inboundRecordApp(e) {
   var panel = app.createVerticalPanel();
   var phoneNumberLabel = app.createLabel("Please enter the phone number you would like Twilio to call to record your voice message");
   var phoneNumberBox = app.createTextBox().setName('phone').setWidth('150px');
-  var lastPhone = ScriptProperties.getProperty('lastPhone');
+  var lastPhone = PropertiesService.getDocumentProperties().getProperty('lastPhone');
   if (lastPhone) {
     phoneNumberBox.setValue(lastPhone);
   }
@@ -969,16 +969,16 @@ function saveRecording(e) {
   var app = UiApp.getActiveApplication();
   var num = e.parameter.num;
   var phoneNumber = e.parameter.phone;
-  ScriptProperties.setProperty('lastPhone', phoneNumber);
+  PropertiesService.getDocumentProperties().setProperty('lastPhone', phoneNumber);
   var recordingName = e.parameter.name;
-  var accountSID = ScriptProperties.getProperty("accountSID");
-  var authToken = ScriptProperties.getProperty("authToken");
-  var twilioNumber = ScriptProperties.getProperty("twilioNumber");
+  var accountSID = PropertiesService.getDocumentProperties().getProperty("accountSID");
+  var authToken = PropertiesService.getDocumentProperties().getProperty("authToken");
+  var twilioNumber = PropertiesService.getDocumentProperties().getProperty("twilioNumber");
   var args = new Object();
   args.RequestResponse = "TRUE";
   args.OutboundMessageRecording = "TRUE";
   args.RecordingName = recordingName;
-  var lang = ScriptProperties.getProperty('defaultVoiceLang');
+  var lang = PropertiesService.getDocumentProperties().getProperty('defaultVoiceLang');
   formMule_makeRoboCall(phoneNumber, "Please record your message after the tone.", accountSID, authToken, '', args, lang);
   return app;
 }
@@ -995,7 +995,7 @@ function doneRecording(e) {
 function saveSmsAndVoiceSettings(e) {
   var app = UiApp.getActiveApplication();
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var properties = ScriptProperties.getProperties();
+  var properties = PropertiesService.getDocumentProperties().getProperties();
   var sheet = ss.getSheetByName(properties.sheetName);
   var headers = sheet.getRange(1, 1, sheet.getLastRow(), sheet.getLastColumn()).getValues()[0];
   properties.smsEnabled = e.parameter.smsEnabled;
@@ -1052,7 +1052,7 @@ function saveSmsAndVoiceSettings(e) {
   }
   var vmPropertyString = Utilities.jsonStringify(vmPropertyObject);
   properties.vmPropertyString = vmPropertyString;
-  ScriptProperties.setProperties(properties);
+  PropertiesService.getDocumentProperties().setProperties(properties);
   app.close();
   return app;
 }
@@ -1069,7 +1069,7 @@ function generatearray(range) {
 
 function doGet(e) {
   var app = UiApp.createApplication();
-  var properties = ScriptProperties.getProperties();
+  var properties = PropertiesService.getDocumentProperties().getProperties();
   var accountSID = properties.accountSID;
   var authToken = properties.authToken;
   var twilioNumber = properties.twilioNumber;
@@ -1193,7 +1193,7 @@ function doGet(e) {
 
 function updateCallStatus(range, obj, recordingUrl) {
   var app = UiApp.getActiveApplication();
-  var ssId = ScriptProperties.getProperty("ssId");
+  var ssId = PropertiesService.getDocumentProperties().getProperty("ssId");
   var ss = SpreadsheetApp.openById(ssId);
   var messages = range.getValue();
   var status = '';
@@ -1259,7 +1259,7 @@ function formMule_splitTexts(longMessage, maxSplits) {
 
 //flagObject contains three parameters: sheetName, header, and row to specify the cell where callback information will be populated
 function formMule_sendAText(phoneNumber, message, accountSID, authToken, flagObject, args, lang, maxTexts){
-  var ssId = ScriptProperties.getProperty("ssId");
+  var ssId = PropertiesService.getDocumentProperties().getProperty("ssId");
   var ss = SpreadsheetApp.openById(ssId);
   var timeZone = ss.getSpreadsheetTimeZone();
   var triggerFlag = false;
@@ -1276,16 +1276,16 @@ function formMule_sendAText(phoneNumber, message, accountSID, authToken, flagObj
   } else {
     flagString = '';
   }
-  accountSID = accountSID||ScriptProperties.getProperty("accountSID");
-  authToken = authToken||ScriptProperties.getProperty("authToken");
-  var twilioNumber = ScriptProperties.getProperty("twilioNumber");
+  accountSID = accountSID||PropertiesService.getDocumentProperties().getProperty("accountSID");
+  authToken = authToken||PropertiesService.getDocumentProperties().getProperty("authToken");
+  var twilioNumber = PropertiesService.getDocumentProperties().getProperty("twilioNumber");
   if (accountSID == null || accountSID == undefined){
-    ScriptProperties.setProperty("accountSID", Browser.inputBox("Please Enter your Twilio account SID"))
-    accountSid = ScriptProperties.getProperty("accountSID");
+    PropertiesService.getDocumentProperties().setProperty("accountSID", Browser.inputBox("Please Enter your Twilio account SID"))
+    accountSid = PropertiesService.getDocumentProperties().getProperty("accountSID");
   }
   if (authToken == null || authToken == undefined){
-    ScriptProperties.setProperty("authToken", Browser.inputBox("Please Enter your Twilio authorization token"))
-    authToken = ScriptProperties.getProperty("authToken");
+    PropertiesService.getDocumentProperties().setProperty("authToken", Browser.inputBox("Please Enter your Twilio authorization token"))
+    authToken = PropertiesService.getDocumentProperties().getProperty("authToken");
   }
   if (lang) {
     message = LanguageApp.translate(message, "", lang);
@@ -1372,7 +1372,7 @@ function setUpdateTrigger() {
 }
 
 function triggerUpdateStatus() {
-  var properties = ScriptProperties.getProperties();
+  var properties = PropertiesService.getDocumentProperties().getProperties();
   var sheetName = properties.sheetName;
   var smsPropertyString = properties.smsPropertyString;
   if ((smsPropertyString)&&(smsPropertyString!='')) {
@@ -1392,7 +1392,7 @@ function triggerUpdateStatus() {
 
 function updateStatus(sheetName, colName) {
   var triggerFlag = false;
-  var ssId = ScriptProperties.getProperty('ssId')
+  var ssId = PropertiesService.getDocumentProperties().getProperty('ssId')
   var ss = SpreadsheetApp.openById(ssId);
   var timeZone = ss.getSpreadsheetTimeZone();
   var sheet = ss.getSheetByName(sheetName);
@@ -1442,8 +1442,8 @@ function updateStatus(sheetName, colName) {
 }
 
 function getCallStatus(sid) {
-  var accountSID = ScriptProperties.getProperty("accountSID");
-  var authToken = ScriptProperties.getProperty("authToken");
+  var accountSID = PropertiesService.getDocumentProperties().getProperty("accountSID");
+  var authToken = PropertiesService.getDocumentProperties().getProperty("authToken");
   try {
     var fetchUrl = "https://api.twilio.com/2010-04-01/Accounts/"+accountSID+"/Calls/"+sid+".xml";
     var callObj = {
@@ -1463,8 +1463,8 @@ function getCallStatus(sid) {
 }
 
 function getRecordingUrl(callSid) {
-    var accountSID = ScriptProperties.getProperty("accountSID");
-    var authToken = ScriptProperties.getProperty("authToken");
+    var accountSID = PropertiesService.getDocumentProperties().getProperty("accountSID");
+    var authToken = PropertiesService.getDocumentProperties().getProperty("authToken");
   try {
     var fetchUrl = this.https + this.webName + accountSID + '/Calls/' + callSid + '/Recordings.xml';
     var callObj = {
@@ -1485,8 +1485,8 @@ function getRecordingUrl(callSid) {
 
 
 function getSMSStatus(sid) {
-  var accountSID = ScriptProperties.getProperty("accountSID");
-  var authToken = ScriptProperties.getProperty("authToken");
+  var accountSID = PropertiesService.getDocumentProperties().getProperty("accountSID");
+  var authToken = PropertiesService.getDocumentProperties().getProperty("authToken");
   try {
     var fetchUrl = "https://api.twilio.com/2010-04-01/Accounts/"+accountSID+"/SMS/Messages/"+sid+".xml";
     var callObj = {
@@ -1510,7 +1510,7 @@ function getSMSStatus(sid) {
 
 //flagObject contains three parameters: sheetName, header, and row to specify the cell where callback information will be populated
 function formMule_makeRoboCall(phoneNumber, message, accountSID, authToken, flagObject, args, lang) {
-  var ssId = ScriptProperties.getProperty("ssId");
+  var ssId = PropertiesService.getDocumentProperties().getProperty("ssId");
   var ss = SpreadsheetApp.openById(ssId);
   var timeZone = ss.getSpreadsheetTimeZone();
   phoneNumber = phoneNumber.replace(/\s+/g, ' ');
@@ -1526,7 +1526,7 @@ function formMule_makeRoboCall(phoneNumber, message, accountSID, authToken, flag
   }
   var triggerFlag = false;
   if (!(lang)) {
-    lang = ScriptProperties.getProperty('defaultVoiceLang');
+    lang = PropertiesService.getDocumentProperties().getProperty('defaultVoiceLang');
   }
   message = LanguageApp.translate(message, "", lang);
   var validLangs = ['en', 'en-gb', 'es', 'fr', 'de'];
@@ -1546,9 +1546,9 @@ function formMule_makeRoboCall(phoneNumber, message, accountSID, authToken, flag
   var messageId = new Date();
   messageId = messageId.getTime();
   CacheService.getPublicCache().put(messageId, message, 3600);
-  accountSID = accountSID||ScriptProperties.getProperty("accountSID");
-  authToken = authToken||ScriptProperties.getProperty("authToken");
-  var twilioNumber = ScriptProperties.getProperty("twilioNumber");
+  accountSID = accountSID||PropertiesService.getDocumentProperties().getProperty("accountSID");
+  authToken = authToken||PropertiesService.getDocumentProperties().getProperty("authToken");
+  var twilioNumber = PropertiesService.getDocumentProperties().getProperty("twilioNumber");
   var webAppUrl = ScriptApp.getService().getUrl() + "?Voice=TRUE&MessageId="+messageId+"&Language="+lang + flagString + argGetString;
   var callBackUrl = ScriptApp.getService().getUrl() + "?VoiceCallBack=TRUE" + flagString + argGetString;
   var status = '';
@@ -1606,8 +1606,8 @@ function formMule_makeRoboCall(phoneNumber, message, accountSID, authToken, flag
 
 //gets the associtated phone numbers with the account 
 function formMule_getPhoneNumbers(accountSid,authToken) {
-  accountSid = accountSid||ScriptProperties.getProperty("twilioID");
-  authToken =  authToken||ScriptProperties.getProperty("securityToken");
+  accountSid = accountSid||PropertiesService.getDocumentProperties().getProperty("twilioID");
+  authToken =  authToken||PropertiesService.getDocumentProperties().getProperty("securityToken");
   var phoneNumbers = [];
 //create checks userproreties using 
   if (accountSid == null || accountSid == undefined){
