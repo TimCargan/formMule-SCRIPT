@@ -12,7 +12,7 @@ function formMule_loadingPreview() {
 
 function formMule_previewSend() {
   var app = UiApp.getActiveApplication();
-  var properties = ScriptProperties.getProperties();
+  var properties = PropertiesService.getDocumentProperties().getProperties();
   app.close();
   var manual = true;
   var app = UiApp.createApplication().setTitle("Here's what your merge will look like...").setWidth(590).setHeight(420);
@@ -423,7 +423,7 @@ function formMule_previewSend() {
   } //end j loop through spreadsheet rows
   
   //begin email status panel
-  var emailStatus = ScriptProperties.getProperty("emailStatus");
+  var emailStatus = PropertiesService.getDocumentProperties().getProperty("emailStatus");
   var emailPanel = app.createVerticalPanel().setHeight("270px");
   emailPanel.add(app.createLabel("Email merge").setStyleAttribute("fontSize","16px").setStyleAttribute("borderTop", "1px solid #EBEBEB").setStyleAttribute("borderBottom", "1px solid #EBEBEB").setStyleAttribute("padding","5px").setWidth("100%").setStyleAttribute("backgroundColor", "whiteSmoke"));
   if (emailStatus=="true") {
@@ -474,7 +474,7 @@ function formMule_previewSend() {
   
   //begin calendar tab
   var calendarPanel = app.createVerticalPanel().setHeight("270px");
-  var calendarStatus = ScriptProperties.getProperty("calendarStatus");
+  var calendarStatus = PropertiesService.getDocumentProperties().getProperty("calendarStatus");
     calendarPanel.add(app.createLabel("Calendar Event Merge").setStyleAttribute("fontSize","16px").setStyleAttribute("borderTop", "1px solid #EBEBEB").setStyleAttribute("borderBottom", "1px solid #EBEBEB").setStyleAttribute("padding","5px").setWidth("100%").setStyleAttribute("backgroundColor", "whiteSmoke"));
   if (calendarStatus=="true") {
   var calScrollPanel = app.createScrollPanel().setWidth("560px").setHeight("260px");
@@ -538,7 +538,7 @@ function formMule_previewSend() {
   
   // Begin calendar update panel
   var calendarUpdatePanel = app.createVerticalPanel().setHeight("300px");
-  var calendarStatus = ScriptProperties.getProperty("calendarUpdateStatus");
+  var calendarStatus = PropertiesService.getDocumentProperties().getProperty("calendarUpdateStatus");
   calendarUpdatePanel.add(app.createLabel("Event Update Merge").setStyleAttribute("fontSize","16px").setStyleAttribute("borderTop", "1px solid #EBEBEB").setStyleAttribute("borderBottom", "1px solid #EBEBEB").setStyleAttribute("padding","5px").setWidth("100%").setStyleAttribute("backgroundColor", "whiteSmoke"));
   var calUpdateVerticalPanel = app.createVerticalPanel().setWidth("560px");
   if (calendarUpdateStatus=="true") {
