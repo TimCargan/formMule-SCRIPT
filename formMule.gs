@@ -1,4 +1,4 @@
-var scriptTitle = "formMule Script V6.5.3 (1/30/14)";
+var scriptTitle = "formMule Script V6.5.4 (4/12/14)";
 var scriptName = 'formMule'
 var scriptTrackingId = 'UA-30976195-1'
 // Written by Andrew Stillman for New Visions for Public Schools
@@ -2070,7 +2070,7 @@ function formMule_defineSettings() {
   if (caseNoSetting=="true") {
    caseNoCheckBox.setValue(true);
   }
-  var helpPopup = app.createDecoratedPopupPanel();
+  var helpPopup = app.createPopupPanel();
   var fieldsLabel = app.createLabel().setText("The formMule script can be used to merge emails and calendar events from any data sheet, however it gains additional power when coupled with a Google Form, VLOOKUP, and other formulas.  See the \"Read Me\" tab in this spreadsheet or visit http://www.youpd.org/formmule for more information about how to use it.");                                         
 
                                           
