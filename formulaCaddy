@@ -3,7 +3,7 @@ var excludedHeaders = ['Merged Doc ID','Merged Doc URL','Link to merged Doc','Do
 
 function returnAlphabet() {
   var alphabet = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
-  var properties = ScriptProperties.getProperties();
+  var properties = PropertiesService.getDocumentProperties().getProperties();
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = getSheetById(ss, properties.formSheetId);
   var excelAlphabet = [];
@@ -26,7 +26,7 @@ function returnAlphabet() {
 
 function getAllExludedHeaders() {
   var theseExcludedHeaders = excludedHeaders;
-  var emailConditions = ScriptProperties.getProperty('emailConditions');
+  var emailConditions = PropertiesService.getDocumentProperties().getProperty('emailConditions');
   if (emailConditions) {
     emailConditions = Utilities.jsonParse(emailConditions);
     for (var key in emailConditions) {
@@ -35,7 +35,7 @@ function getAllExludedHeaders() {
       }
     }
   }
-  var calendarConditions = ScriptProperties.getProperty('calendarConditions');
+  var calendarConditions = PropertiesService.getDocumentProperties().getProperty('calendarConditions');
   if (calendarConditions) {
     calendarConditions = Utilities.jsonParse(calendarConditions);
     for (var key in calendarConditions) {
@@ -44,7 +44,7 @@ function getAllExludedHeaders() {
       }
     }
   }
-  var smsConditions = ScriptProperties.getProperty('smsConditions');
+  var smsConditions = PropertiesService.getDocumentProperties().getProperty('smsConditions');
   if (smsConditions) {
     smsConditions = Utilities.jsonParse(smsConditions);
     for (var key in smsConditions) {
@@ -117,7 +117,7 @@ function copyDownFormulas(thisRow, properties) {
 
 function returnCopydownStatusColIndex() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheetName = ScriptProperties.getProperty('sheetName');
+  var sheetName = PropertiesService.getDocumentProperties().getProperty('sheetName');
   var sheet = ss.getSheetByName(sheetName);
   if (sheet) {
     var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
@@ -138,7 +138,7 @@ function returnCopydownStatusColIndex() {
 function formMule_detectFormSheet() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var ssId = ss.getId();
-  ScriptProperties.setProperty('ssId', ssId);
+  PropertiesService.getDocumentProperties().setProperty('ssId', ssId);
   var formUrl = ss.getFormUrl();
   if (!formUrl) {
     Browser.msgBox("This feature only works on Spreadsheets with attached forms");
@@ -163,7 +163,7 @@ function formMule_detectFormSheet() {
     }
   }
   if (found) {
-    ScriptProperties.setProperty('formSheetId', formSheetId);
+    PropertiesService.getDocumentProperties().setProperty('formSheetId', formSheetId);
   } else {
     var error = catchNoFormSheetDetected(ss);
   }
@@ -185,7 +185,7 @@ function catchNoFormSheetDetected(ss) {
       return 'error';
     }
   }
-  ScriptProperties.setProperty('formSheetId', formSheetId);
+  PropertiesService.getDocumentProperties().setProperty('formSheetId', formSheetId);
   return;
 }
 
@@ -203,7 +203,7 @@ function getSheetById(ss, sheetId) {
 
 function formulaCaddy_createJob() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var properties = ScriptProperties.getProperties();
+  var properties = PropertiesService.getDocumentProperties().getProperties();
   var sheets = ss.getSheets();
   var sheetNames = [];
   for (var i=0; i<sheets.length; i++) {
@@ -424,7 +424,7 @@ function formulaCaddy_getSheetFormulas(sheet, row) {
 
 function formulaCaddy_refreshRowFormulas(e) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheetProperties = ScriptProperties.getProperties();
+  var sheetProperties = PropertiesService.getDocumentProperties().getProperties();
   var sheetId = e.parameter.sheetId;
   var colValues = sheetProperties['colValues'];
   if (colValues) {
@@ -472,7 +472,7 @@ function toggleOpacity(e) {
 
 function saveformulaCaddySettings(e) {
   var app = UiApp.getActiveApplication();
-  var properties = ScriptProperties.getProperties();
+  var properties = PropertiesService.getDocumentProperties().getProperties();
   var sheetId = e.parameter.sheetId;
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = getSheetById(ss, sheetId);
@@ -496,14 +496,14 @@ function saveformulaCaddySettings(e) {
         try {
           delete colValues["col-" + (j+1)];
           delete properties["formula-" + (j+1)];
-          ScriptProperties.deleteProperty("formula-" + (j+1));
+          PropertiesService.getDocumentProperties().deleteProperty("formula-" + (j+1));
         } catch(err) { 
         }
       }
     }
   properties.copyDownFormulas = copyDownFormulas;
   properties.colValues = Utilities.jsonStringify(colValues);
-  ScriptProperties.setProperties(properties);
+  PropertiesService.getDocumentProperties().setProperties(properties);
   returnCopydownStatusColIndex();
   app.close();
   return app;
