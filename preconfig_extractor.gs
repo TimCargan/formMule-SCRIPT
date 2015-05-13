@@ -1,12 +1,12 @@
 function formMule_extractorWindow () {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var properties = ScriptProperties.getProperties();
+  var properties = PropertiesService.getDocumentProperties().getProperties();
   var propertyString = '';
   var excludeProperties = ['formmule_sid', 'caseNo', 'ssId', 'SSId', 'calendarToken', 'webAppUrl','twilioNumber','accountSID','lastPhone','authToken','preconfigStatus', 'ssId', 'ssKey', 'formulaTriggerSet'];
   for (var key in properties) {
     if (excludeProperties.indexOf(key)==-1) {
       var keyProperty = properties[key]; //.replace(/[/\\*]/g, "\\\\");                                     
-      propertyString += "   ScriptProperties.setProperty('" + key + "','" + keyProperty + "');\n";
+      propertyString += "   PropertiesService.getDocumentProperties().setProperty('" + key + "','" + keyProperty + "');\n";
     }
   }
   var app = UiApp.createApplication().setHeight(500).setTitle("Export preconfig() settings");
@@ -17,11 +17,11 @@ function formMule_extractorWindow () {
   var label = app.createLabel(labelText);
   var window = app.createTextArea();
   var codeString = "//This section sets all script properties associated with this formMule profile \n";
-  codeString += "var preconfigStatus = ScriptProperties.getProperty('preconfigStatus');\n";
+  codeString += "var preconfigStatus = PropertiesService.getDocumentProperties().getProperty('preconfigStatus');\n";
   codeString += "if (preconfigStatus!='true') {\n";
   codeString += propertyString; 
   codeString += "};\n";
-  codeString += "ScriptProperties.setProperty('preconfigStatus','true');\n";
+  codeString += "PropertiesService.getDocumentProperties().setProperty('preconfigStatus','true');\n";
   codeString += "var ss = SpreadsheetApp.getActiveSpreadsheet();\n";
   if (properties.formulaTriggerSet == "true") {
     codeString += "setCopyDownTrigger(); \n";
@@ -31,10 +31,10 @@ function formMule_extractorWindow () {
   if ((properties.calendarStatus == 'true')||(properties.emailStatus == 'true')) {
     codeString += "\n \n";
     codeString += "//Custom popup and function calls to prompt user for additional settings \n";
-    if (ScriptProperties.getProperty('emailStatus')=="true") {
+    if (PropertiesService.getDocumentProperties().getProperty('emailStatus')=="true") {
        codeString += "Browser.msgBox(\"You will want to check the email template sheets to ensure the correct sender and recipients are listed before using.\");\n";
     }
-    if (ScriptProperties.getProperty('calendarStatus')=="true") {
+    if (PropertiesService.getDocumentProperties().getProperty('calendarStatus')=="true") {
     codeString += "Browser.msgBox(\"You need to set a new calendarID for this script before it will work.\");\n";
     codeString += "formMule_setCalendarSettings();";
     }
