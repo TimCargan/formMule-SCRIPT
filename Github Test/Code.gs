@@ -35,7 +35,7 @@ function pushToGit(files, branch, name, email, commitMessage){
  
   //Post files
   var postTreePayload = JSON.stringify({
-    //base_tree: shaBaseTree,
+    base_tree: shaBaseTree,
     tree:files
   });
   var postTree = UrlFetchApp.fetch(baseURl + repoURL + "/git/trees",
