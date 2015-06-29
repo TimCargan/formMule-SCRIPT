@@ -1,6 +1,7 @@
-
+//TO_DO
+//Need to calciuate diff so not pushing big commits
     
-function getGASFile() {
+function pushFilesToGit() {
   var fileIds = ["1LZQAZoZvwPLRBFrYntDBkswOzLXzPR8nBNXmy07YXj9HDiD0M46YyMda"]
   var filesToPush = []
   
@@ -38,3 +39,4 @@ function getGASFile() {
   var commitMessage = "Test"
   pushToGit(filesToPush,"/heads/master", name, email, commitMessage)
 }
+

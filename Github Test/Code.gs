@@ -21,7 +21,7 @@ function pushToGit(files, branch, name, email, commitMessage){
   
   var repo = JSON.parse(getRepo)
   var shaLatestCommit = repo.object.sha
-  debugger;
+
   //Get commit
   var getCommit = UrlFetchApp.fetch(baseURl + repoURL + "/git/commits/" + shaLatestCommit,{
                                     headers:{
@@ -32,10 +32,10 @@ function pushToGit(files, branch, name, email, commitMessage){
   
   var commit = JSON.parse(getCommit)
   var shaBaseTree = commit.tree.sha
-   debugger;
+ 
   //Post files
   var postTreePayload = JSON.stringify({
-    base_tree: shaBaseTree,
+    //base_tree: shaBaseTree,
     tree:files
   });
   var postTree = UrlFetchApp.fetch(baseURl + repoURL + "/git/trees",
@@ -50,7 +50,7 @@ function pushToGit(files, branch, name, email, commitMessage){
   
   var tree = JSON.parse(postTree)
   var shaNewTree = tree.sha
-   debugger;
+   
   ///Post comit
   
   var postCommitPayload = JSON.stringify({

@@ -1,6 +1,5 @@
 function createScriptFile(fileName, code) {  
   var code = { "files": code}
-  
   var resource = {
     "title": fileName,
     "parents": [
@@ -34,6 +33,11 @@ function gitToGas() {
                                   }).getContentText();
   
   var repo = JSON.parse(tree)
+  treeToSorce(repo, "Top")
+  
+}
+
+function treeToSorce(repo, scriptName){
   var files = []
   
   for (var i in repo.tree){
@@ -47,6 +51,12 @@ function gitToGas() {
                                   }).getContentText();
     
     leafContent = JSON.parse(leafContent)
+    
+    //If its a folder, extract it by calling the fuction resusrivly
+    if(leaf.type == "tree"){
+      treeToSorce(leafContent, leaf.path)
+      continue
+    }
     
     var decoded = Utilities.base64Decode(leafContent['content'], Utilities.Charset.UTF_8)
     var code = Utilities.newBlob(decoded).getDataAsString()
@@ -67,12 +77,11 @@ function gitToGas() {
       }
     files.push(file)
     }
+debugger;
+  createScriptFile(scriptName, files)
   
-  createScriptFile("pull code", files)
-  debugger;
   
 }
-
 
 function getGASFilhhhe() {
   var fileIds = ["1tUP_tNya0fzmskBX8Elibgajn5vKQ7HbAcJFsbP4YDAnDg_zDQYncHkL"]
