@@ -2,7 +2,7 @@
 //Need to calciuate diff so not pushing big commits
     
 function pushFilesToGit() {
-  var fileIds = ["1LZQAZoZvwPLRBFrYntDBkswOzLXzPR8nBNXmy07YXj9HDiD0M46YyMda"]
+  var fileIds = ["1LZQAZoZvwPLRBFrYntDBkswOzLXzPR8nBNXmy07YXj9HDiD0M46YyMda", "1TlBOVOzyZG2PlMgB6MKGekH4KqfiFQ9CNYStc54RDM9EV6DujViTL9lz"]
   var filesToPush = []
   
   for (var fileId in fileIds){

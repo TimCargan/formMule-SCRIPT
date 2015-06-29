@@ -29,7 +29,8 @@ function pushToGit2(files, branch, name, email, commitMessage){
       break
     }
   }
-  debugger;
+
+  
   //Post files
   var postTreePayload = JSON.stringify({
     base_tree: folderSha,
