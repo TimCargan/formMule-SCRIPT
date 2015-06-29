@@ -62,6 +62,24 @@ function thing(){
 
   var tree = JSON.parse(newTree)
   var shaNewTree = tree.sha
+  
+  //Post files
+  var postTreePayload = {
+    base_tree: repo.sha,
+    tree: [new Tree(tree.sha)]
+  };
+  
+  var postTreePayloadE = JSON.stringify(postTreePayload)
+  var newTree = UrlFetchApp.fetch(baseURl + repoURL + "/git/trees",
+                                  {
+                                  headers:{
+                                  'Authorization': 'token ' + git
+                                  },
+                                  method: "post",
+                                  payload:postTreePayloadE
+  
+  }).getContentText();
+
    
   ///Post comit
   
