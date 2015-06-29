@@ -40,3 +40,4 @@ function pushFilesToGit() {
   pushToGit(filesToPush,"/heads/master", name, email, commitMessage)
 }
 
+
