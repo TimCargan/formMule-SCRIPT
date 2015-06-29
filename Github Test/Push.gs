@@ -23,7 +23,7 @@ function pushFilesToGit() {
     
     for(var gs in files){
       var extention = files[gs].type == "server_js" ? ".gs" : ".html"
-      var fileName = files[gs].name + extention
+      var fileName = folder + "/" + files[gs].name + extention
       var fileContent = files[gs].source  
       filesToPush.push({
         "path": fileName,
