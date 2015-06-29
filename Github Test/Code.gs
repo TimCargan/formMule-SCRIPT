@@ -22,20 +22,29 @@ function pushToGit(files, branch, name, email, commitMessage){
   var repo = JSON.parse(getRepo)
   var shaLatestCommit = repo.object.sha
 
-  //Get commit
-  var getCommit = UrlFetchApp.fetch(baseURl + repoURL + "/git/commits/" + shaLatestCommit,{
-                                    headers:{
-                                    'Authorization': 'token ' + git
-                                    },
-                                    muteHttpExceptions: true
-                                    }).getContentText();
+  var tree = UrlFetchApp.fetch( baseURl + repoURL + "/git/trees/" + shaLatestCommit,{
+                                  headers:{
+                                  'Authorization': 'token ' + git
+                                  },
+                                  muteHttpExceptions: true
+                                  }).getContentText();
   
-  var commit = JSON.parse(getCommit)
-  var shaBaseTree = commit.tree.sha
- 
+  var commit = JSON.parse(tree)
+  var shaBaseTree = commit.sha
+  
+  for (var i in commit.tree){
+    var leaf = commit.tree[i]
+    //If its a folder, extract it by calling the fuction resusrivly
+    if(leaf.type == "tree"){
+      var folderSha = leaf.sha
+      break
+    }
+  }
+
+  
   //Post files
   var postTreePayload = JSON.stringify({
-    //base_tree: shaBaseTree,
+    base_tree: folderSha,
     tree:files
   });
   var postTree = UrlFetchApp.fetch(baseURl + repoURL + "/git/trees",

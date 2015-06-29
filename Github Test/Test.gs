@@ -1,4 +1,6 @@
-function thing(){ 
+function pushToGit2(files, branch, name, email, commitMessage){
+  
+  //Get Reop
   var getRepo = UrlFetchApp.fetch( baseURl + repoURL + "/git/refs/heads/master",{
                                   headers:{
                                   'Authorization': 'token ' + git
@@ -9,88 +11,54 @@ function thing(){
   var repo = JSON.parse(getRepo)
   var sha = repo.object.sha
   
-  var basetree = UrlFetchApp.fetch( baseURl + repoURL + "/git/trees/" + sha,{
-                               headers:{
-                               'Authorization': 'token ' + git
-                               },
-                               muteHttpExceptions: true
-                               }).getContentText();
-  var repo = JSON.parse(basetree)
-  
-  
-  var files = []
-  
-  for (var i in repo.tree){
-    var leaf = repo.tree[i]
-   
-    
-    //If its a folder, extract it by calling the fuction resusrivly
-    if(leaf.type == "tree"){
-      
-      var url = leaf.url
-      var leafContent = UrlFetchApp.fetch(url ,{
-        headers:{
-          'Authorization': 'token ' + git
-        },
-        muteHttpExceptions: true
-      }).getContentText();
-      
-      leafContent = JSON.parse(leafContent)
-      leafContent.tree.pop() 
-      leafContent.tree.pop() 
-      leafContent.tree.pop() 
-    }
-  }
-  
-
-  
- 
-  //Post files
-  var postTreePayload = {
-    base_tree: sha,
-    tree: leafContent.tree
-  };
-  
-  var postTreePayloadE = JSON.stringify(postTreePayload)
-  var newTree = UrlFetchApp.fetch(baseURl + repoURL + "/git/trees",
-                                  {
+  var tree = UrlFetchApp.fetch( baseURl + repoURL + "/git/trees/" + sha,{
                                   headers:{
                                   'Authorization': 'token ' + git
                                   },
-                                  method: "post",
-                                  payload:postTreePayloadE
+                                  muteHttpExceptions: true
+                                  }).getContentText();
   
-  }).getContentText();
-
-  var tree = JSON.parse(newTree)
+  var commit = JSON.parse(tree)
+  var shaBaseTree = commit.sha
+  
+  for (var i in commit.tree){
+    var leaf = commit.tree[i]
+    //If its a folder, extract it by calling the fuction resusrivly
+    if(leaf.type == "tree"){
+      var folderSha = leaf.sha
+      break
+    }
+  }
+  debugger;
+  //Post files
+  var postTreePayload = JSON.stringify({
+    base_tree: folderSha,
+    tree:files
+  });
+  var postTree = UrlFetchApp.fetch(baseURl + repoURL + "/git/trees",
+                                   {
+                                   headers:{
+                                   'Authorization': 'token ' + git
+                                   },
+                                   method: "post",
+                                   payload:postTreePayload
+                                   
+                                   }).getContentText();
+  
+  var tree = JSON.parse(postTree)
   var shaNewTree = tree.sha
-  
-  var pushPayload = JSON.stringify({
-                               sha: shaNewTree,
-                               })
-  
-  var push = UrlFetchApp.fetch( baseURl + repoURL + "/git/refs/heads/master/Github%20Test",
-                               {
-                               headers:{
-                               'Authorization': 'token ' + git
-                               },
-                               "method" : "post",
-                               payload: pushPayload,
-                               muteHttpExceptions: true
-                               }).getContentText();
-  
    
   ///Post comit
   
   var postCommitPayload = JSON.stringify({
-    "message": "test",
+    "message": commitMessage,
     "author": {
       "date": Date().toString,
-      "name": "Tim Cargan",
-      "email": "timcargan@gmail.com"
+      "name": name,
+      "email": email
     },
     'tree': shaNewTree,
-    'parents': [sha]
+    'parents': [shaLatestCommit]
   });
   
   var postCommit = UrlFetchApp.fetch(baseURl + repoURL + "/git/commits",
@@ -109,7 +77,7 @@ function thing(){
                                sha: shaNewCommit,
                                })
   
-  var push = UrlFetchApp.fetch( baseURl + repoURL + "/git/refs/heads/master",
+  var push = UrlFetchApp.fetch( baseURl + repoURL + "/git/refs" + branch,
                                {
                                headers:{
                                'Authorization': 'token ' + git
@@ -118,14 +86,9 @@ function thing(){
                                payload: pushPayload,
                                muteHttpExceptions: true
                                }).getContentText();
- 
   
 }
 
-function Tree (path, tree) {
-  this.path = "Test/Tim/t"
-  this.mode = "040000"
-  this.type = "tree"
-  this.sha = path
-}
 
+
+   
