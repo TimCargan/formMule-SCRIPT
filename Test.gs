@@ -1,18 +1,7 @@
-//Object
-function File (fileName, content) {
-  this.path = fileName
-  this.mode = "100644"
-  this.type = "blob"
-  this.content = content
-}
-
-var git = "dd63dbed7ef5c2b10c85b866f4db35897aecbe95"
-var baseURl = "https://api.github.com/repos"
-var repoURL = "/TimCargan/formMule-SCRIPT"
-function pushToGit(files, branch, name, email, commitMessage){
+function pushToGit2(files, branch, name, email, commitMessage){
   
   //Get Reop
-  var getRepo = UrlFetchApp.fetch( baseURl + repoURL + "/git/refs" + branch,{
+  var getRepo = UrlFetchApp.fetch( baseURl + repoURL + "/git/refs/heads/master",{
                                   headers:{
                                   'Authorization': 'token ' + git
                                   },
@@ -20,9 +9,9 @@ function pushToGit(files, branch, name, email, commitMessage){
                                   }).getContentText();
   
   var repo = JSON.parse(getRepo)
-  var shaLatestCommit = repo.object.sha
-
-  var tree = UrlFetchApp.fetch( baseURl + repoURL + "/git/trees/" + shaLatestCommit,{
+  var sha = repo.object.sha
+  
+  var tree = UrlFetchApp.fetch( baseURl + repoURL + "/git/trees/" + sha,{
                                   headers:{
                                   'Authorization': 'token ' + git
                                   },
@@ -100,3 +89,7 @@ function pushToGit(files, branch, name, email, commitMessage){
                                }).getContentText();
   
 }
+
+
+
+   
