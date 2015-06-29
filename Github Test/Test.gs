@@ -42,19 +42,21 @@ function thing(){
   
 
   
+ 
   //Post files
   var postTreePayload = {
-    base_tree: leafContent.sha,
-    tree: new Tree(1,leafContent.tree)
+    base_tree: repo.sha,
+    tree: leafContent.tree
   };
   
+  var postTreePayloadE = JSON.stringify(postTreePayload)
   var newTree = UrlFetchApp.fetch(baseURl + repoURL + "/git/trees",
                                   {
                                   headers:{
                                   'Authorization': 'token ' + git
                                   },
                                   method: "post",
-                                  payload:JSON.stringify(postTreePayload)
+                                  payload:postTreePayloadE
   
   }).getContentText();
 
@@ -104,8 +106,9 @@ function thing(){
 }
 
 function Tree (path, tree) {
-  this.path = "F/t"
+  this.path = "Test/Tim/t"
   this.mode = "040000"
   this.type = "tree"
-  this.sha = tree
+  this.sha = path
 }
+
