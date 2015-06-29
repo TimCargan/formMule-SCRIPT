@@ -36,7 +36,7 @@ function pushToGit(files, branch, name, email, commitMessage){
   //Post files
   //This is a hack of sorts, to keep up with file renames, everything is over written. 
   var postTreePayload = JSON.stringify({
-    //base_tree: shaBaseTree,
+    base_tree: shaBaseTree,
     tree: files 
   });
   var postTree = UrlFetchApp.fetch(baseURl + repoURL + "/git/trees",

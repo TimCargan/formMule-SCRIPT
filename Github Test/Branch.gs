@@ -11,7 +11,7 @@ function createBranch(branchName) {
   var shaLatestCommit = repo.object.sha
   
   var newBranchPayload = JSON.stringify({
-    "ref": "refs/heads/featureA",
+    "ref": "refs/heads/" + branchName,
     "sha": shaLatestCommit
   })
   
@@ -29,41 +29,9 @@ function createBranch(branchName) {
   return newBranch
 }
 
-function mergeToMaster(from, commit){
-  mergerBranch(from, "master", commit)
-}
-
-function mergeBranch(from, to, commit){
-  
- var mergePayload = JSON.stringify({
-  "base": to,
-  "head": from,
-  "commit_message": "Shipped cool_feature!"
-})
-  
-  
-  var mergeResponse = UrlFetchApp.fetch(baseURl + repoURL + "/merges",
-                                    {
-                                    headers:{
-                                    'Authorization': 'token ' + git
-                                    },
-                                    method: "post",
-                                    payload: mergePayload,
-                                    
-                                    }).getContentText();
-  
-  var deleteBranch = UrlFetchApp.fetch( baseURl + repoURL + "/git/refs/heads/" + from,{
-                                  headers:{
-                                  'Authorization': 'token ' + git
-                                  },
-                                   method: "delete"
-                                  }).getContentText();
-  
-
-  debugger;
-}
 
 function test(){
+  createBranch("newFet") 
   var file = new File("Test push another New file", "THis is a test push of a new file")
 
 //Get post info
@@ -74,8 +42,29 @@ function test(){
   //Push commit to Github
   var commitMessage = "Test of a new file to a new branch"
   
-  pushToGit([file], "/heads/featureA", authorName, authorEmail, commitMessage)
+  pushToGit([file], "/heads/newFet", authorName, authorEmail, commitMessage)
   
+  pull("newFet", "master")
   
 }
- 
+
+function pull(from, to){
+  
+ var mergePayload = JSON.stringify({
+  "title": "Amazing new feature",
+  "body": "Please pull this in!",
+  "head": from,
+  "base": to
+} )
+  
+  
+  var pullResponse = UrlFetchApp.fetch(baseURl + repoURL + "/pulls",
+                                    {
+                                    headers:{
+                                    'Authorization': 'token ' + git
+                                    },
+                                    method: "post",
+                                    payload: mergePayload,
+                                    
+                                    }).getContentText();
+}
