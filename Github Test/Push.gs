@@ -37,7 +37,8 @@ function pushFilesToGit() {
   var name = "Tim Cargan"
   var email = "timcargan@gmail.com"
   var commitMessage = "Test"
-  pushToGit(filesToPush,"/heads/master", name, email, commitMessage)
+  
+  pushToGit(filesToPush, "/heads/master" , name, email, commitMessage)
 }
 
 

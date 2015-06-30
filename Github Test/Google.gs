@@ -1,12 +1,10 @@
-function createScriptFile(fileName, code) {  
+function createScriptFile(fileName, code) {
+  //wrap code in oject for DriveSDK  
   var code = { "files": code}
+  //Create DriveFile for script file
   var resource = {
     "title": fileName,
-    "parents": [
-      {
-        "id": "0B4FHJs5FbHQMcFE3YlBCVEZuMms"
-      }
-    ]
+    "parents": [{ "id": "0B4FHJs5FbHQMcFE3YlBCVEZuMms" }] //One line for neatness, its an array of id objs
   };
   
   var blob = Utilities.newBlob(JSON.stringify(code), "application/vnd.google-apps.script+json");
@@ -14,7 +12,6 @@ function createScriptFile(fileName, code) {
 }
 
 function gitToGas() {
-
  var getRepo = UrlFetchApp.fetch( baseURl + repoURL + "/git/refs/heads/master",{
                                   headers:{
                                   'Authorization': 'token ' + git
@@ -33,7 +30,7 @@ function gitToGas() {
                                   }).getContentText();
   
   var repo = JSON.parse(tree)
-  treeToSorce(repo, "Top")
+  treeToSorce(repo, "metta")
   
 }
 
@@ -77,34 +74,6 @@ function treeToSorce(repo, scriptName){
       }
     files.push(file)
     }
-debugger;
-  createScriptFile(scriptName, files)
-  
-  
-}
 
-function getGASFilhhhe() {
-  var fileIds = ["1tUP_tNya0fzmskBX8Elibgajn5vKQ7HbAcJFsbP4YDAnDg_zDQYncHkL"]
-  var filesToPush = []
-  
-  for (var fileId in fileIds){
-    //Get file from drive
-    var scriptFile = Drive.Files.get(fileIds[fileId]);
-    var exportLink = scriptFile.exportLinks["application/vnd.google-apps.script+json"];
-    var oAuthToken = ScriptApp.getOAuthToken();
-    var lib = UrlFetchApp.fetch(exportLink, {
-      headers:{
-        'Authorization': 'Bearer ' + oAuthToken
-      },
-      muteHttpExceptions: true
-    });
-    
-    //load files into Array
-    var files = JSON.parse(lib.getContentText()).files
-    var folder =  scriptFile.title
-    
-    debugger;
-    
-   
-  }
+  createScriptFile(scriptName, files) 
 }

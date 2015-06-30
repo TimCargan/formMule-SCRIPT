@@ -6,12 +6,11 @@ function File (fileName, content) {
   this.content = content
 }
 
-var git = "dd63dbed7ef5c2b10c85b866f4db35897aecbe95"
+var git = gitService().getAccessToken()
 var baseURl = "https://api.github.com/repos"
 var repoURL = "/TimCargan/formMule-SCRIPT"
 
 function pushToGit(files, branch, name, email, commitMessage){
-  
   //Get Reop
   var getRepo = UrlFetchApp.fetch( baseURl + repoURL + "/git/refs" + branch,{
                                   headers:{
@@ -24,45 +23,26 @@ function pushToGit(files, branch, name, email, commitMessage){
   var shaLatestCommit = repo.object.sha
 
   //Get Tree
-  var getTree = UrlFetchApp.fetch(baseURl + repoURL + "/git/trees/" + shaLatestCommit,{
+  var oldTree = UrlFetchApp.fetch(baseURl + repoURL + "/git/trees/" + shaLatestCommit,{
                                     headers:{
                                     'Authorization': 'token ' + git
                                     },
                                     muteHttpExceptions: true
                                     }).getContentText();
   
-  var treeFull = JSON.parse(getTree)
-  var shaBaseTree = treeFull.sha
- 
-  var treeRaw = treeFull.tree
-  var foldersBeingPushed = []
-  //Get folders being updated
-  for (var i in files){
-    var file = files[i]
-    var folder = file.path.split("/")[0]
-    if (foldersBeingPushed.indexOf(folder) == -1){
-      foldersBeingPushed.push(folder)
-    }
-  }
+  oldTree = JSON.parse(oldTree)
+  var shaBaseTree = oldTree.sha
+  var treeRaw = oldTree.tree
   
-  //Remove files and folders that are being updated
-  for (var i = treeRaw.length - 1; i >0; i--){
-    var leaf = treeRaw[i]
-    if (foldersBeingPushed.indexOf(leaf.path) != -1){
-      treeRaw.splice(i,1)
-    }
-  }
-  
-  //Add new files
-  var treeToPush = treeRaw
-  treeToPush = treeToPush.concat(files)
+  var treeToPush = calcDiffTree(files, treeRaw)
   
   //Post files
   //This is a hack of sorts, to keep up with file renames, everything is over written. 
   var postTreePayload = JSON.stringify({
     tree: treeToPush 
   });
-  debugger;
+
+  
   var postTree = UrlFetchApp.fetch(baseURl + repoURL + "/git/trees",
                                    {
                                    headers:{
@@ -73,8 +53,8 @@ function pushToGit(files, branch, name, email, commitMessage){
                                    
                                    }).getContentText();
   
-  var tree = JSON.parse(postTree)
-  var shaNewTree = tree.sha
+  var newTree = JSON.parse(postTree)
+  var shaNewTree = newTree.sha
    
   ///Post comit
   
@@ -115,4 +95,39 @@ function pushToGit(files, branch, name, email, commitMessage){
                                muteHttpExceptions: true
                                }).getContentText();
   
+}
+
+//Calculate the diff tree so files get renamed, updated and deleted
+//esentaly rebuild the repo tree 
+/*
+@ files = files being pushed 
+@ treeRaw = currentTree
+
+*/
+function calcDiffTree(files, treeRaw){
+  
+  //This is how files get renamed since there is no clean way to rename and bulk push commits
+  var foldersBeingPushed = []
+  //Get folders being updated
+  for (var i in files){
+    var file = files[i]
+    var folder = file.path.split("/")[0]
+    if (foldersBeingPushed.indexOf(folder) == -1){
+      foldersBeingPushed.push(folder)
+    }
+  }
+  
+  //Remove files and folders that are being updated
+  for (var i = treeRaw.length - 1; i >0; i--){
+    var leaf = treeRaw[i]
+    if (foldersBeingPushed.indexOf(leaf.path) != -1){
+      treeRaw.splice(i,1)
+    }
+  }
+  
+  //Add new files
+  var treeToPush = treeRaw
+  treeToPush = treeToPush.concat(files)
+  
+  return treeToPush
 }

@@ -22,11 +22,28 @@ function createBranch(branchName) {
                                     'Authorization': 'token ' + git
                                     },
                                     method: "post",
-                                    payload: newBranchPayload,
+                                    payload: newBranchPayload, 
+                                    }).getContentText();
+  return newBranch
+}
+
+function pull(from, to, pullTite, pullDes){
+ var mergePayload = JSON.stringify({
+  "title": pullTite,
+  "body": pullDes,
+  "head": from,
+  "base": to
+} )
+  
+  var pullResponse = UrlFetchApp.fetch(baseURl + repoURL + "/pulls",
+                                    {
+                                    headers:{
+                                    'Authorization': 'token ' + git
+                                    },
+                                    method: "post",
+                                    payload: mergePayload,
                                     
                                     }).getContentText();
-  
-  return newBranch
 }
 
 
@@ -48,23 +65,4 @@ function test(){
   
 }
 
-function pull(from, to){
-  
- var mergePayload = JSON.stringify({
-  "title": "Amazing new feature",
-  "body": "Please pull this in!",
-  "head": from,
-  "base": to
-} )
-  
-  
-  var pullResponse = UrlFetchApp.fetch(baseURl + repoURL + "/pulls",
-                                    {
-                                    headers:{
-                                    'Authorization': 'token ' + git
-                                    },
-                                    method: "post",
-                                    payload: mergePayload,
-                                    
-                                    }).getContentText();
-}
+
