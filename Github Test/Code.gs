@@ -6,58 +6,31 @@ function File (fileName, content) {
   this.content = content
 }
 
-var git = gitService().getAccessToken()
-var baseURl = "https://api.github.com/repos"
-var repoURL = "/TimCargan/formMule-SCRIPT"
+
 
 function pushToGit(files, branch, name, email, commitMessage){
-  //Get Reop
-  var getRepo = UrlFetchApp.fetch( baseURl + repoURL + "/git/refs" + branch,{
-                                  headers:{
-                                  'Authorization': 'token ' + git
-                                  },
-                                  muteHttpExceptions: true
-                                  }).getContentText();
-  
-  var repo = JSON.parse(getRepo)
+  var repoURL = "/TimCargan/formMule-SCRIPT"
+
+  //Get Reop  
+  var repo = getRepo(repoURL, branch)
   var shaLatestCommit = repo.object.sha
 
   //Get Tree
-  var oldTree = UrlFetchApp.fetch(baseURl + repoURL + "/git/trees/" + shaLatestCommit,{
-                                    headers:{
-                                    'Authorization': 'token ' + git
-                                    },
-                                    muteHttpExceptions: true
-                                    }).getContentText();
-  
-  oldTree = JSON.parse(oldTree)
-  var shaBaseTree = oldTree.sha
+  var oldTree = getTree(repoURL, shaLatestCommit)
+  //var shaBaseTree = oldTree.sha
   var treeRaw = oldTree.tree
   
-  var treeToPush = calcDiffTree(files, treeRaw)
+  var treeToPush = calcDiffTree(files, treeRaw) //This is a hack of sorts, to keep up with file renames, everything is over written.
   
   //Post files
-  //This is a hack of sorts, to keep up with file renames, everything is over written. 
   var postTreePayload = JSON.stringify({
     tree: treeToPush 
   });
-
   
-  var postTree = UrlFetchApp.fetch(baseURl + repoURL + "/git/trees",
-                                   {
-                                   headers:{
-                                   'Authorization': 'token ' + git
-                                   },
-                                   method: "post",
-                                   payload:postTreePayload
-                                   
-                                   }).getContentText();
-  
-  var newTree = JSON.parse(postTree)
+  var newTree = postTree(repoURL, postTreePayload)
   var shaNewTree = newTree.sha
    
   ///Post comit
-  
   var postCommitPayload = JSON.stringify({
     "message": commitMessage,
     "author": {
@@ -68,33 +41,14 @@ function pushToGit(files, branch, name, email, commitMessage){
     'tree': shaNewTree,
     'parents': [shaLatestCommit]
   });
-  
-  var postCommit = UrlFetchApp.fetch(baseURl + repoURL + "/git/commits",
-                                     {
-                                     headers:{
-                                     'Authorization': 'token ' + git
-                                     },
-                                     payload: postCommitPayload,
-                                     muteHttpExceptions: true
-                                     }).getContentText();
-  
-  var postedCommit = JSON.parse(postCommit)
+
+  var postedCommit = postCommit(repoURL, postCommitPayload)
   var shaNewCommit = postedCommit.sha
   
-  var pushPayload = JSON.stringify({
-                               sha: shaNewCommit,
-                               })
-  
-  var push = UrlFetchApp.fetch( baseURl + repoURL + "/git/refs" + branch,
-                               {
-                               headers:{
-                               'Authorization': 'token ' + git
-                               },
-                               "method" : "post",
-                               payload: pushPayload,
-                               muteHttpExceptions: true
-                               }).getContentText();
-  
+  //Update ref so the new commit is shown
+  var pushPayload = JSON.stringify({sha: shaNewCommit})
+  postRef(repoURL, branch, pushPayload)
+
 }
 
 //Calculate the diff tree so files get renamed, updated and deleted
